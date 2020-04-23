@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 #define BUF_SIZE 1024
 
@@ -23,8 +24,11 @@ int output(const message_t *m, operation_t op){
     }
 
     char buf[BUF_SIZE];
-    if(sprintf(buf, "%ld ; %d ; %d ; %lu ; %d ; %d ; %s\n", time(NULL), m->i, m->pid, m->tid, m->dur, m->pl, op_str) < 0) return EXIT_FAILURE;
-    if(write(STDOUT_FILENO, buf, strlen(buf)) == -1) return EXIT_FAILURE;
+    if (sprintf(buf, "%ld ; %d ; %d ; %lu ; %d ; %d ; %s\n", time(NULL), m->i, m->pid, m->tid, m->dur, m->pl, op_str) < 0 ||
+        write(STDOUT_FILENO, buf, strlen(buf)) == -1){
+        errno = EIO;
+        return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }
