@@ -49,8 +49,11 @@ make testzip
 ## User Commands
 
 ```sh
-???
+Un <-t nsecs> FIFONAME
+Qn <-t nsecs> [-l nplaces] [-n nthreads] FIFONAME
 ```
 
-Supports the following options:
-- ?
+- `-t nsecs`: (approximate) number of seconds the program will run
+- `-l nplaces`: maximum occupation of the bathroom
+- `-n nthreads`: maximum number of threads handling requests
+- `FIFONAME`: Filesystem path to named FIFO used to request/receive requests.
