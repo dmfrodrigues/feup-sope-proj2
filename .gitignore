@@ -1,0 +1,7 @@
+T6G05/
+*.o
+*.zip
+client/obj/
+server/obj/
+client/client
+server/server
