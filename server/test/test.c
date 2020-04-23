@@ -2,6 +2,8 @@
 
 #include "server_args.h"
 
+#include <limits.h>
+
 char** deconstify_argv(int argc, const char **argv_const){
     char **argv = calloc(argc, sizeof(char*));
     for(int i = 0; i < argc; ++i){
@@ -87,6 +89,8 @@ void test_server_args_ctor6(void) {
     server_args_t args;
     TEST_CHECK(server_args_ctor(&args, argc, argv) == EXIT_SUCCESS);
     TEST_CHECK(args.nsecs == 2);
+    TEST_CHECK(args.nplaces == 3);
+    TEST_CHECK(args.nthreads == 4);
     TEST_CHECK(strcmp(args.fifoname, "fifopath") == 0);
     TEST_CHECK(server_args_dtor(&args) == EXIT_SUCCESS);
 
@@ -102,6 +106,24 @@ void test_server_args_ctor7(void) {
     TEST_CHECK(server_args_ctor(&args, argc, argv) == EXIT_SUCCESS);
     TEST_CHECK(args.nsecs == 2);
     TEST_CHECK(strcmp(args.fifoname, "fifopath") == 0);
+    TEST_CHECK(args.nplaces == 3);
+    TEST_CHECK(args.nthreads == 4);
+    TEST_CHECK(server_args_dtor(&args) == EXIT_SUCCESS);
+
+    free_argv(argc, argv);
+}
+
+void test_server_args_ctor8(void) {
+    int argc = 4;
+    const char *argv_const[5] = {"prog", "-t", "5", "fifopath", NULL};
+    char **argv = deconstify_argv(argc, argv_const);
+
+    server_args_t args;
+    TEST_CHECK(server_args_ctor(&args, argc, argv) == EXIT_SUCCESS);
+    TEST_CHECK(args.nsecs == 5);
+    TEST_CHECK(args.nplaces == INT_MAX);
+    TEST_CHECK(args.nthreads == 1000000000);
+    TEST_CHECK(strcmp(args.fifoname, "fifopath") == 0);
     TEST_CHECK(server_args_dtor(&args) == EXIT_SUCCESS);
 
     free_argv(argc, argv);
@@ -115,5 +137,6 @@ TEST_LIST = {
     {"server_args_ctor5"      , test_server_args_ctor5      },
     {"server_args_ctor6"      , test_server_args_ctor6      },
     {"server_args_ctor7"      , test_server_args_ctor7      },
+    {"server_args_ctor8"      , test_server_args_ctor8      },
     {NULL, NULL}
 };

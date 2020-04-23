@@ -6,12 +6,13 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <errno.h>
+#include <limits.h>
 
 static const server_args_t server_args_default = 
 { 
 .nsecs = -1,
-.nplaces = -1,
-.nthreads = -1,
+.nplaces = INT_MAX,
+.nthreads = 1000000000,
 .fifoname = NULL
 };
 
@@ -42,8 +43,6 @@ int server_args_ctor(server_args_t *p, int argc, char *argv[]){
     opterr = 1;
 
     if (p->nsecs    == server_args_default.nsecs    ||
-        p->nplaces  == server_args_default.nplaces  ||
-        p->nthreads == server_args_default.nthreads ||
         argc - optind != 1){
         errno = EINVAL;
         return EXIT_FAILURE;
