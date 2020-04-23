@@ -44,7 +44,7 @@ zip: clean
 	rm -rf $(GROUP)
 	rm -f $(GROUP).zip
 	mkdir $(GROUP)
-	cp -r client server acutest makefile README.md $(GROUP)
+	cp -r common client server acutest makefile README.md $(GROUP)
 	zip --symlinks $(GROUP).zip -r $(GROUP)
 	rm -rf $(GROUP)
 
