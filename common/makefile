@@ -1,8 +1,9 @@
-COMMON	=../common/lib
-APP		=client
+COMMON	=./lib
 SDIR	=./src
 IDIR	=./include
 ODIR   	=./obj
+LDIR    =./lib
+LIB		=$(LDIR)/libcommon.a
 TDIR   	=./test
 TFILE	=test
 TAPP   	=$(ODIR)/test
@@ -16,31 +17,34 @@ CFLAGS_PARANOID =-Wall -Wextra -Wformat-nonliteral -Wcast-align -Wpointer-arith 
 -Wstrict-prototypes -Winline -Wundef \
 -Wnested-externs -Wcast-qual -Wshadow -Wwrite-strings -Wno-unused-parameter \
 -Wfloat-equal -pedantic -Wno-long-long -Wno-endif-labels -g 
-CFLAGS =-Wall -g #-O3
-#CFLAGS=$(CFLAGS_PARANOID)
 
-all: $(APP)
+# CFLAGS =-Wall -g #-O3
+CFLAGS=$(CFLAGS_PARANOID)
+
+all: makefolders $(LIB)
 
 clean:
 	rm -f  $(TAPP)
 	rm -f  $(APP)
 	rm -rf $(ODIR)
+	rm -rf $(LDIR)
 
-test: all $(TSRC)
+test: all $(TSRC) $(LIB)
 	@echo Current directory: $(PWD)
 	$(CC) $(CFLAGS) $(IFLAGS) -I$(ACUTEST) -c $(TDIR)/$(TFILE).c -o $(ODIR)/$(TFILE).o
-	$(CC) $(ODIR)/$(TFILE).o $(ODIR)/client_args.o -o $(TAPP) $(LFLAGS)
+	$(CC) $(ODIR)/$(TFILE).o -o $(TAPP) $(LFLAGS)
 	./$(TAPP)
 
 testmem: all
 	valgrind --leak-check=yes $(TAPP)
 
-$(APP):   $(ODIR)/client.o $(ODIR)/client_args.o
-	make -C ../common
-	$(CC) $(ODIR)/client.o $(ODIR)/client_args.o -o $(APP) $(LFLAGS)
-
-$(ODIR):
+makefolders:
 	mkdir -p $(ODIR)
+	mkdir -p $(LDIR)
 
-$(ODIR)/%.o: $(ODIR) $(SDIR)/%.c
+$(LIB):   $(ODIR)/output.o
+	rm -f $(LIB)
+	ar rvs $(LIB) $(ODIR)/output.o
+
+$(ODIR)/%.o:          $(SDIR)/%.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c $^ -o $@

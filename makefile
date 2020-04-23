@@ -1,3 +1,5 @@
+COMMONDIR		=./common
+
 CLIENTDIR		=./client
 CLIENTOLDAPP	=$(CLIENTDIR)/client
 CLIENTNEWAPP	=./U1
@@ -6,22 +8,29 @@ SERVERDIR		=./server
 SERVEROLDAPP	=$(SERVERDIR)/server
 SERVERNEWAPP	=./Q1
 
-makes:
+all: $(CLIENTNEWAPP) $(SERVERNEWAPP)
+
+$(CLIENTOLDAPP):
 	make -C $(CLIENTDIR)
+
+$(SERVEROLDAPP):
 	make -C $(SERVERDIR)
 
-all: makes
+$(CLIENTNEWAPP): $(CLIENTOLDAPP)
 	cp $(CLIENTOLDAPP) $(CLIENTNEWAPP)
+
+$(SERVERNEWAPP): $(SERVEROLDAPP)
 	cp $(SERVEROLDAPP) $(SERVERNEWAPP)
 
 clean:
+	make -C $(COMMONDIR) clean
 	make -C $(CLIENTDIR) clean
 	make -C $(SERVERDIR) clean
 	rm -f $(CLIENTNEWAPP)
 	rm -f $(SERVERNEWAPP)
 
 test:
-	@echo Current directory: $(PWD)
+	make -C $(COMMONDIR) test
 	make -C $(CLIENTDIR) test
 	make -C $(SERVERDIR) test
 

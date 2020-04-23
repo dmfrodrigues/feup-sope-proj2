@@ -5,3 +5,8 @@ client/obj/
 server/obj/
 client/client
 server/server
+lib*.a
+U1
+Q1
+U2
+Q2
