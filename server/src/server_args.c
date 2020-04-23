@@ -1,4 +1,4 @@
-#include "client_args.h"
+#include "server_args.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -7,16 +7,18 @@
 #include <getopt.h>
 #include <errno.h>
 
-static const client_args_t client_args_default = 
+static const server_args_t server_args_default = 
 { 
 .nsecs = -1,
+.nplaces = -1,
+.nthreads = -1,
 .fifoname = NULL
 };
 
-static const char optstring[] = "t:";
+static const char optstring[] = "t:l:n:";
 
-int client_args_ctor(client_args_t *p, int argc, char *argv[]){
-    *p = client_args_default;
+int server_args_ctor(server_args_t *p, int argc, char *argv[]){
+    *p = server_args_default;
     char buf[1024];
 
     if(p == NULL || argv == NULL){ errno = EINVAL; return EXIT_FAILURE; }
@@ -26,9 +28,11 @@ int client_args_ctor(client_args_t *p, int argc, char *argv[]){
     int opt = 0;
     while((opt = getopt(argc, argv, optstring)) != -1){
         switch(opt){
-            case 't': if(sscanf(optarg, "%d", &p->nsecs) != 1) return EXIT_FAILURE; break;
+            case 't': if(sscanf(optarg, "%d", &p->nsecs   ) != 1) return EXIT_FAILURE; break;
+            case 'l': if(sscanf(optarg, "%d", &p->nplaces ) != 1) return EXIT_FAILURE; break;
+            case 'n': if(sscanf(optarg, "%d", &p->nthreads) != 1) return EXIT_FAILURE; break;
             case '?':
-                sprintf(buf, "client: invalid option -- '%c'\n", optopt);
+                sprintf(buf, "server: invalid option -- '%c'\n", optopt);
                 write(STDERR_FILENO, buf, strlen(buf));
                 return EXIT_FAILURE;
             default:
@@ -37,7 +41,9 @@ int client_args_ctor(client_args_t *p, int argc, char *argv[]){
     }
     opterr = 1;
 
-    if (p->nsecs == client_args_default.nsecs ||
+    if (p->nsecs    == server_args_default.nsecs    ||
+        p->nplaces  == server_args_default.nplaces  ||
+        p->nthreads == server_args_default.nthreads ||
         argc - optind != 1){
         errno = EINVAL;
         return EXIT_FAILURE;
@@ -49,7 +55,7 @@ int client_args_ctor(client_args_t *p, int argc, char *argv[]){
     return EXIT_SUCCESS;
 }
 
-int client_args_dtor(client_args_t *p){
+int server_args_dtor(server_args_t *p){
     if(p == NULL) return EXIT_SUCCESS;
     free(p->fifoname);
     p->fifoname = NULL;

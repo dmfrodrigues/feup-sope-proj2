@@ -8,26 +8,26 @@ SERVERNEWAPP	=./Q1
 
 makes:
 	make -C $(CLIENTDIR)
-	# make -C $(SERVERDIR)
+	make -C $(SERVERDIR)
 
 all: makes
 	cp $(CLIENTOLDAPP) $(CLIENTNEWAPP)
-	# cp $(SERVEROLDAPP) $(SERVERNEWAPP)
+	cp $(SERVEROLDAPP) $(SERVERNEWAPP)
 
 clean:
 	make -C $(CLIENTDIR) clean
-	# make -C $(SERVERDIR) clean
+	make -C $(SERVERDIR) clean
 	rm -f $(CLIENTNEWAPP)
 	rm -f $(SERVERNEWAPP)
 
 test:
 	@echo Current directory: $(PWD)
 	make -C $(CLIENTDIR) test
-	# make -C $(SERVERDIR) test
+	make -C $(SERVERDIR) test
 
 testmem:
 	make -C $(CLIENTDIR) testmem
-	# make -C $(SERVERDIR) testmem
+	make -C $(SERVERDIR) testmem
 
 GROUP=T6G05
 

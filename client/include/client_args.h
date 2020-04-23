@@ -11,7 +11,7 @@ typedef struct {
      */
     int nsecs;
     /**
-     * @brief Files to analyse.
+     * @brief Named pipe the client must connect to.
      */
     char *fifoname;
 } client_args_t;
