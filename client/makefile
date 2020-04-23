@@ -42,5 +42,5 @@ $(APP):   $(ODIR)/client.o $(ODIR)/client_args.o
 $(ODIR):
 	mkdir -p $(ODIR)
 
-$(ODIR)/%.o: $(ODIR) $(SDIR)/%.c
-	$(CC) $(CFLAGS) $(IFLAGS) -c $^ -o $@
+$(ODIR)/%.o: $(SDIR)/%.c $(ODIR)
+	$(CC) $(CFLAGS) $(IFLAGS) -c $< -o $@
