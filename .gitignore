@@ -3,6 +3,7 @@ T6G05/
 *.zip
 client/obj/
 server/obj/
+common/obj/
 client/client
 server/server
 lib*.a

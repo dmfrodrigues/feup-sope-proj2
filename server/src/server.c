@@ -12,10 +12,12 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#define MAX_THREADS 1000000
+
 server_args_t args;
 
 int init(int argc, char* argv[]){
-    if(server_args_ctor(&args, argc, argv)) return EXIT_FAILURE;
+    if(server_args_ctor(&args, argc, argv, 1000000)) return EXIT_FAILURE;
     if(server_install_handlers()) return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }

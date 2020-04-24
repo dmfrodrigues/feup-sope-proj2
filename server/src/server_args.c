@@ -12,14 +12,14 @@ static const server_args_t server_args_default =
 { 
 .nsecs = -1,
 .nplaces = INT_MAX,
-.nthreads = 1000000000,
 .fifoname = NULL
 };
 
 static const char optstring[] = "t:l:n:";
 
-int server_args_ctor(server_args_t *p, int argc, char *argv[]){
+int server_args_ctor(server_args_t *p, int argc, char *argv[], int max_threads){
     *p = server_args_default;
+    p->nthreads = max_threads;
     char buf[1024];
 
     if(p == NULL || argv == NULL){ errno = EINVAL; return EXIT_FAILURE; }
@@ -43,6 +43,7 @@ int server_args_ctor(server_args_t *p, int argc, char *argv[]){
     opterr = 1;
 
     if (p->nsecs    == server_args_default.nsecs    ||
+        p->nthreads > max_threads ||
         argc - optind != 1){
         errno = EINVAL;
         return EXIT_FAILURE;

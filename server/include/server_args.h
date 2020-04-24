@@ -34,7 +34,7 @@ typedef struct {
  * @param argv  Arguments passed to program, to fill server_args_t
  * @return int  EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int server_args_ctor(server_args_t *p, int argc, char *argv[]);
+int server_args_ctor(server_args_t *p, int argc, char *argv[], int max_threads);
 
 /**
  * @brief server_args destructor.
