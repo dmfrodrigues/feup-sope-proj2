@@ -22,6 +22,10 @@
 
 int main(int argc, char *argv[]){
     
+    int n = 0;
+    int *request_number = &n;         // start at 0 or 1 ?
+    *request_number = 0;
+
     client_args_t *c_args = NULL;
 
     // get args
@@ -50,7 +54,7 @@ int main(int argc, char *argv[]){
         };
 
         // create thread
-        if (client_create_thread() != EXIT_SUCCESS) {
+        if (client_create_thread(request_number) != EXIT_SUCCESS) {
             // handle error
         }
 
@@ -63,6 +67,7 @@ int main(int argc, char *argv[]){
 
     
     client_args_dtor(c_args);
+    free(request_number);
 
     return 0;
 }
