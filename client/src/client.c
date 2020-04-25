@@ -7,17 +7,17 @@
 #include "client_tbdname.h"
 
 /*
-- [x] get args
-- [x] function for random ms
-- [-] function to open public fifo (fifoname arg)
-- [-] create threads
-- [ ] function to create request("pedido")
-- [-] function to create/open private fifo
-- [ ] send requests via public fifo
-- [ ] check answer from server
-- [ ] function to close/destroy private fifo
-- [ ] close thread
-- [ ] ...
+- get args
+- function for random ms
+- function to open public fifo (fifoname arg)
+- create threads
+- function to create request("pedido")
+- function to create/open private fifo
+- send requests via public fifo
+- check answer from server
+- function to close/destroy private fifo
+- close thread
+- ...
 */
 
 int main(int argc, char *argv[]){
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]){
     client_args_ctor(c_args, argc, argv);
 
     // "fundamental operations"
-
+    
 
     // "waiting interval" struct
     struct timespec *to_wait = NULL;
@@ -54,13 +54,9 @@ int main(int argc, char *argv[]){
         };
 
         // create thread
-        if (client_create_thread(request_number) != EXIT_SUCCESS) {
+        if (client_create_thread(request_number, c_args->fifoname) != EXIT_SUCCESS) {
             // handle error
         }
-
-        // close
-
-
 
         end_time = clock();
     }
