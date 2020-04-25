@@ -1,8 +1,10 @@
 #include "client_tbdname.h"
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <time.h>
+
 
 #include <pthread.h>
 
@@ -35,6 +37,17 @@ int client_create_open_private_fifo(const char *pathname, mode_t mode, int *fd) 
     return EXIT_SUCCESS;
 }
 
+int client_elim_private_fifo(const char *pathname, int *fd) {
+
+    // close file descriptor
+    if (close(*fd) == -1) return EXIT_FAILURE;
+
+    // delete pathname from file system
+    if (unlink(pathname) == -1) return EXIT_FAILURE;
+
+    return EXIT_SUCCESS;
+}
+
 
 int client_generate_rand_param() {
 
@@ -48,6 +61,12 @@ int client_create_thread() {
     pthread_t tid;
     pthread_create(&tid, NULL, client_execute_thread, NULL);
 
+    // send request via fifoname (arg)
+
+    // get answer via (to be created) private channel
+
+
+    return EXIT_SUCCESS;
 }
 
 void *client_execute_thread(void *arg) {

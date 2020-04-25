@@ -33,16 +33,16 @@ int main(int argc, char *argv[]){
     // "waiting interval" struct
     struct timespec *to_wait = NULL;
 
-    int run_ms = 1000 * c_args->nsecs; // converting seconds to ms
+    int run_ms = MILLISECOND_MULT * c_args->nsecs; // converting seconds to ms
 
     long start_time = clock(), elapsed;
     long end_time = start_time;
 
     // "throw" threads
-    while ( (elapsed = (end_time - start_time) / CLOCKS_PER_SEC * 1000) < run_ms) {
+    while ( (elapsed = (end_time - start_time) / CLOCKS_PER_SEC * MILLISECOND_MULT) < run_ms) {
         
         // waiting between requests
-        to_wait->tv_nsec = NANOSECOND_MULTIPLIER * client_generate_random_ms(10, 20);
+        to_wait->tv_nsec = NANOSECOND_MULT * client_generate_random_ms(10, 20);
         if (nanosleep(to_wait, NULL) == -1) {
             // deal with error
             // EINTR -> interrupted by a signal
@@ -50,10 +50,9 @@ int main(int argc, char *argv[]){
         };
 
         // create thread
-
-        // send request via fifoname (arg)
-
-        // get answer via (to be created) private channel
+        if (client_create_thread() != EXIT_SUCCESS) {
+            // handle error
+        }
 
         // close
 
