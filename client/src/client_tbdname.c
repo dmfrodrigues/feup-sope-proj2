@@ -105,21 +105,23 @@ void *client_execute_thread(void *arg) {
     // Send request via fifoname (argument) - public fifo
     if (client_send_request(local_thread_args_c->public_fifoname, to_send) != EXIT_SUCCESS) return (void *) EXIT_FAILURE;
 
-    int *fd = 0; // is there a correct way not to have the unitialized warning?
+    int fd = 0; // is there a correct way not to have the unitialized warning?
     // Open (private) fifo
-    if (client_open_private_fifo(pathname, fd) != EXIT_SUCCESS) return (void *) EXIT_FAILURE;
+    if (client_open_private_fifo(pathname, &fd) != EXIT_SUCCESS) return (void *) EXIT_FAILURE;
 
     message_t answer_received;
     // Get answer from server
-    if (client_get_answer(pathname, fd, &answer_received) != EXIT_SUCCESS) return (void *) EXIT_FAILURE;
+    if (client_get_answer(pathname, &fd, &answer_received) != EXIT_SUCCESS) return (void *) EXIT_FAILURE;
     
     // Close/Eliminate (private) fifo
-    if (client_elim_private_fifo(pathname, fd) != EXIT_SUCCESS) return (void *) EXIT_FAILURE;
+    if (client_elim_private_fifo(pathname, &fd) != EXIT_SUCCESS) return (void *) EXIT_FAILURE;
 
     free(local_thread_args_c->tid);
     free(local_thread_args_c->request_number);
     free(local_thread_args_c->public_fifoname);
     free(local_thread_args_c);
+
+
 
     return (void *) EXIT_SUCCESS;
 }
