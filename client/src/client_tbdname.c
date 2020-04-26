@@ -145,8 +145,6 @@ int client_send_request(char *pathname, message_t to_send) {
 }
 
 int client_get_answer(char *pathname, int *fd, message_t *answer_received) {
-    
-
 
     if (read(*fd, answer_received, PIPE_BUF) == -1) return EXIT_FAILURE;
 

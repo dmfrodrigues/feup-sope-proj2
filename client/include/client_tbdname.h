@@ -11,12 +11,28 @@
 
 #define REQUEST_PL_FIELD    -1      // message_t pl field for request
 
+/**
+ * @brief struct used to pass multiple arguments to the thread function
+ * 
+ */
 typedef struct {
 
+    /**
+     * @brief ID returned by pthread_create()
+     * 
+     */
     pthread_t *tid;
 
+    /**
+     * @brief Number of the request to be sent
+     * 
+     */
     int *request_number;
 
+    /**
+     * @brief pathname of the fifoname to where the request is to be sent
+     * 
+     */
     char *public_fifoname;
 
 } t_args;
@@ -40,7 +56,15 @@ long client_generate_random_ms(int lower, int upper); // use default values: low
  */
 int client_open_public_fifo(const char *pathname, int *fd);
 
-
+/**
+ * @brief Creates the client's (private) fifo that will get the answer from the server
+ * 
+ * @param mode 
+ * @param pid 
+ * @param tid 
+ * @param pathname      
+ * @return int          EXIT_FAILURE if error, EXIT_SUCCESS otherwise
+ */
 int client_create_private_fifo(mode_t mode, pid_t pid, pthread_t tid, char *pathname);
 
 /**
@@ -75,7 +99,7 @@ message_t client_generate_rand_request(pthread_t tid, int *request_number);
  * 
  * @param request_number 
  * @param fifoname          name of channel to send the request
- * @return int 
+ * @return int              EXIT_FAILURE if error, EXIT_SUCCESS otherwise
  */
 int client_create_thread(int *request_number, char *fifoname);
 
@@ -90,13 +114,20 @@ void *client_execute_thread(void *arg);
 /**
  * @brief Sends request via the public fifo to the server
  * 
- * @param pathname      fifo "identifier"
+ * @param pathname      (public) fifo "identifier"
  * @param to_send       request to be sent
  * @return int          EXIT_FAILURE if error, EXIT_SUCCESS otherwise
  */
 int client_send_request(char *pathname, message_t to_send);
 
-
+/**
+ * @brief Gets answer from server
+ * 
+ * @param pathname          (private) fifo "identifier"
+ * @param fd                file descriptor of the client's (private) fifo
+ * @param answer_received   "returns" the answer given by the server
+ * @return int              EXIT_FAILURE if error, EXIT_SUCCESS otherwise
+ */
 int client_get_answer(char *pathname, int *fd, message_t *answer_received);
 
 #endif //CLIENT_TBDNAME_H_INCLUDED
