@@ -48,25 +48,26 @@ void* server_thread_func(void *arg){
 
     message_t *m = (message_t*)arg;
 
-    // Use bathroom
-    //     Make confirmation message
-    message_t confirm = {
-        .i = m->i,
-        .pid = getpid(),
-        .tid = pthread_self(),
-        .dur = m->dur
-    };
-    pthread_mutex_lock(&num_processed_requests_mutex);
-    confirm.pl = num_processed_requests++;
-    pthread_mutex_unlock(&num_processed_requests_mutex);
-    //     Confirm usage of bathroom
-    if(output(&confirm, op_ENTER)) { *ret = EXIT_FAILURE; return ret; }
-    //     Open, write and close private fifo
-    if(server_thread_answer(m, &confirm)) { *ret = EXIT_FAILURE; return ret; }
-    //     Actually use bathroom
-    if(common_wait(m->dur));
-    //     Finished using the bathroom
-    if(output(&confirm, op_TIMUP)) { *ret = EXIT_FAILURE; return ret; }
+    /* Use bathroom */{
+        /* Make confirmation message */
+        message_t confirm; {
+            confirm.i = m->i;
+            confirm.pid = getpid();
+            confirm.tid = pthread_self();
+            confirm.dur = m->dur;
+            pthread_mutex_lock(&num_processed_requests_mutex);
+            confirm.pl = num_processed_requests++;
+            pthread_mutex_unlock(&num_processed_requests_mutex);
+        }
+        // Confirm usage of bathroom
+        if(output(&confirm, op_ENTER)) { *ret = EXIT_FAILURE; return ret; }
+        // Open, write and close private fifo
+        if(server_thread_answer(m, &confirm)) { *ret = EXIT_FAILURE; return ret; }
+        // Actually use bathroom
+        if(common_wait(m->dur));
+        // Finished using the bathroom
+        if(output(&confirm, op_TIMUP)) { *ret = EXIT_FAILURE; return ret; }
+    }
     //Routine stuff
     pthread_mutex_lock(&num_threads_mutex);
     --num_threads;
