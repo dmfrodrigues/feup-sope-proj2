@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <time.h>
+#include <stdbool.h>
 
 #define REQUEST_PL_FIELD    -1      // message_t pl field for request
 
@@ -34,7 +35,14 @@ int client_send_request(char *pathname, message_t to_send) {
     return EXIT_SUCCESS;
 }
 
+static int num_threads = 0;
+static pthread_mutex_t num_threads_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 void *client_execute_thread(void *arg) {
+    pthread_mutex_lock(&num_threads_mutex);
+    ++num_threads;
+    pthread_mutex_unlock(&num_threads_mutex);
+
     int *ret = malloc(sizeof(int)); *ret = EXIT_SUCCESS;
     client_thread_args_t *args = (client_thread_args_t *)arg;
     // Create message 
@@ -71,5 +79,19 @@ void *client_execute_thread(void *arg) {
     if(client_thread_args_dtor(args)){ *ret = EXIT_FAILURE; return ret; }
     free(args);
     // Return
+    pthread_mutex_lock(&num_threads_mutex);
+    --num_threads;
+    pthread_mutex_unlock(&num_threads_mutex);
     return ret;
+}
+
+#define SLEEP_MICROSECONDS 100000
+
+int client_wait_all_threads(void){
+    while(true){
+        pthread_mutex_lock(&num_threads_mutex);
+        if(num_threads <= 0){ pthread_mutex_unlock(&num_threads_mutex); return EXIT_SUCCESS;}
+        pthread_mutex_unlock(&num_threads_mutex);
+        if(usleep(SLEEP_MICROSECONDS)) return EXIT_FAILURE;
+    }
 }

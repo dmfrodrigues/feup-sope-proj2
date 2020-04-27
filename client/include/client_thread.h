@@ -15,4 +15,6 @@
  */
 void *client_execute_thread(void *arg);
 
+int client_wait_all_threads(void);
+
 #endif //CLIENT_TBDNAME_H_INCLUDED

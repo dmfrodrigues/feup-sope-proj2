@@ -48,5 +48,7 @@ int main(int argc, char *argv[]){
         pthread_create(&dummy, NULL, client_execute_thread, args);
     }
 
+    client_wait_all_threads();
+
     return EXIT_SUCCESS;
 }

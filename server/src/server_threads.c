@@ -78,7 +78,7 @@ int server_create_thread(const message_t *m){
 int server_wait_all_threads(void){
     while(true){
         pthread_mutex_lock(&num_threads_mutex);
-        if(num_threads <= 0) return EXIT_SUCCESS;
+        if(num_threads <= 0){ pthread_mutex_unlock(&num_threads_mutex); return EXIT_SUCCESS;}
         pthread_mutex_unlock(&num_threads_mutex);
         if(usleep(SLEEP_MICROSECONDS)) return EXIT_FAILURE;
     }
