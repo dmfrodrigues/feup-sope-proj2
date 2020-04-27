@@ -1,5 +1,6 @@
 #include "common_atomic.h"
 
+#include <stdlib.h>
 #include <pthread.h>
 
 struct atomic_lli {
