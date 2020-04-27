@@ -21,6 +21,8 @@ CFLAGS_PARANOID =-Wall -Wextra -Wformat-nonliteral -Wcast-align -Wpointer-arith 
 # CFLAGS =-Wall -g #-O3
 CFLAGS=$(CFLAGS_PARANOID)
 
+O_FILES=$(ODIR)/output.o $(ODIR)/common_time.o $(ODIR)/utils.o
+
 all: makefolders $(LIB)
 
 clean:
@@ -42,9 +44,9 @@ makefolders:
 	mkdir -p $(ODIR)
 	mkdir -p $(LDIR)
 
-$(LIB):   $(ODIR)/output.o
+$(LIB):   $(O_FILES)
 	rm -f $(LIB)
-	ar rvs $(LIB) $(ODIR)/output.o
+	ar rvs $(LIB) $(O_FILES)
 
 $(ODIR)/%.o:          $(SDIR)/%.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c $^ -o $@

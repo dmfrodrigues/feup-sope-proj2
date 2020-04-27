@@ -46,10 +46,14 @@ int main(int argc, char *argv[]){
     }
 
     message_t m;
-    while(read(fifo_des, &m, sizeof(message_t)) == sizeof(message_t)){
-        if(output(&m, op_RECVD)){ ret = EXIT_FAILURE; break; }
+    int r;
+    while((r = read(fifo_des, &m, sizeof(message_t))) != -1){
+        //printf("L51, r=%d\n", r);
+        if(r == sizeof(message_t)){
+            if(output(&m, op_RECVD)){ ret = EXIT_FAILURE; break; }
+        }
         
-    }
+    } printf("L54, r=%d, errno=%d\n", r, errno);
     if(errno != EINTR) ret = EXIT_FAILURE;
 
     if(close(fifo_des)) ret = EXIT_FAILURE;

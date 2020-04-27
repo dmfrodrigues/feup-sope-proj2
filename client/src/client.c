@@ -1,69 +1,52 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 
 
 #include "client_args.h"
-#include "client_tbdname.h"
+#include "client_thread.h"
+#include "common_time.h"
+#include "utils.h"
 
-/*
-- get args
-- function for random ms
-- function to open public fifo (fifoname arg)
-- create threads
-- function to create request("pedido")
-- function to create/open private fifo
-- send requests via public fifo
-- check answer from server
-- function to close/destroy private fifo
-- close thread
-- ...
-*/
+#define NANOSECOND_MULT     1000000 // from ms to ns
+#define MILLISECOND_MULT    1000    // from sec to ms
+
+client_args_t c_args;
+
+int client_init(int argc, char *argv[]){
+    client_args_ctor(&c_args, argc, argv);
+    return EXIT_SUCCESS;
+}
+
+void client_clean(void){
+    client_args_dtor(&c_args);
+}
 
 int main(int argc, char *argv[]){
-    
-    int n = 0;
-    int *request_number = &n;         // start at 0 or 1 ?
-    *request_number = 0;
-
-    client_args_t *c_args = NULL;
-
-    // get args
-    client_args_ctor(c_args, argc, argv);
-
-    // "fundamental operations"
-    
-
-    // "waiting interval" struct
-    struct timespec *to_wait = NULL;
-
-    int run_ms = MILLISECOND_MULT * c_args->nsecs; // converting seconds to ms
-
-    long start_time = clock(), elapsed;
-    long end_time = start_time;
-
-    // "throw" threads
-    while ( (elapsed = (end_time - start_time) / CLOCKS_PER_SEC * MILLISECOND_MULT) < run_ms) {
-        
-        // waiting between requests
-        to_wait->tv_nsec = NANOSECOND_MULT * client_generate_random_ms(10, 20);
-        if (nanosleep(to_wait, NULL) == -1) {
-            // deal with error
-            // EINTR -> interrupted by a signal
-            // EINTR -> 1st arg is less than zero or greater/equal than 1000 million
+    // Initialize
+    if(client_init(argc, argv)) return EXIT_FAILURE;
+    if(atexit(client_clean)) return EXIT_FAILURE;
+    // Time
+    const double run_ms = MILLISECOND_MULT * c_args.nsecs;      // Time to run program
+    if(common_starttime(NULL)) return EXIT_FAILURE;             // Start timer
+    double time = 0; if(common_gettime(&time)) return EXIT_FAILURE; // Get initial value for timer
+    // Launch threads
+    int res = 0;
+    for(int n = 0; time < run_ms; (res = common_gettime(&time)), ++n){
+        if(res) return EXIT_FAILURE;
+        // Waiting between requests
+        struct timespec to_wait = {
+            .tv_sec = 0,
+            .tv_nsec = NANOSECOND_MULT*random_range(10, 20)
         };
-
-        // create thread
-        if (client_create_thread(request_number, c_args->fifoname) != EXIT_SUCCESS) {
-            // handle error
-        }
-
-        end_time = clock();
+        if (nanosleep(&to_wait, NULL)) return EXIT_FAILURE;
+        // Create thread
+        client_thread_args_t *args = malloc(sizeof(client_thread_args_t));
+        if(client_thread_args_ctor(args, n, random_range(100, 200), c_args.fifoname)) return EXIT_FAILURE;
+        pthread_t dummy;
+        pthread_create(&dummy, NULL, client_execute_thread, args);
     }
 
-    
-    client_args_dtor(c_args);
-    free(request_number);
-
-    return 0;
+    return EXIT_SUCCESS;
 }
