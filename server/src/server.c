@@ -52,7 +52,6 @@ int main(int argc, char *argv[]){
         // Open public fifo
         int fifo_des = open(args.fifoname, O_RDONLY);
         if(fifo_des == -1){
-            if(unlink(args.fifoname)) ret = EXIT_FAILURE;
             if(errno == EINTR) break;
             else               return EXIT_FAILURE;
         }
