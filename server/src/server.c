@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <stdbool.h>
 
 #define MAX_THREADS 1000000
 
@@ -29,6 +30,8 @@ void cleanup(void){
     }
 }
 
+bool stop = false;
+
 int main(int argc, char *argv[]){
     int ret = EXIT_SUCCESS;
 
@@ -38,25 +41,29 @@ int main(int argc, char *argv[]){
     if(alarm(args.nsecs)) return EXIT_FAILURE;
     
     mkfifo(args.fifoname, 0660);
-    int fifo_des = open(args.fifoname, O_RDONLY);
-    if(fifo_des == -1){
-        if(unlink(args.fifoname)) ret = EXIT_FAILURE;
-        if(errno == EINTR) return ret;
-        else               return EXIT_FAILURE;
+    
+    while(!stop){
+        int fifo_des = open(args.fifoname, O_RDONLY);
+        if(fifo_des == -1){
+            if(unlink(args.fifoname)) ret = EXIT_FAILURE;
+            if(errno == EINTR) break;
+            else               return EXIT_FAILURE;
+        }
+
+        int r;
+        message_t m;
+        while((r = read(fifo_des, &m, sizeof(message_t))) == sizeof(message_t)){
+            // printf("L51, r=%d\n", r);
+            if(r == sizeof(message_t)){
+                if(output(&m, op_RECVD)){ ret = EXIT_FAILURE; break; }
+            }
+            
+        }
+        if(r != 0){ ret = EXIT_FAILURE; break; }
+        if(errno == EINTR){ stop = true; }
+        close(fifo_des);
     }
 
-    message_t m;
-    int r;
-    while((r = read(fifo_des, &m, sizeof(message_t))) != -1){
-        //printf("L51, r=%d\n", r);
-        if(r == sizeof(message_t)){
-            if(output(&m, op_RECVD)){ ret = EXIT_FAILURE; break; }
-        }
-        
-    } printf("L54, r=%d, errno=%d\n", r, errno);
-    if(errno != EINTR) ret = EXIT_FAILURE;
-
-    if(close(fifo_des)) ret = EXIT_FAILURE;
     if(unlink(args.fifoname)) ret = EXIT_FAILURE;
 
     return ret;
