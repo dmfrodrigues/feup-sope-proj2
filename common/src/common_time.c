@@ -36,3 +36,12 @@ int common_gettime(double *d){
     *d = (double)(now)/1000.0;
     return EXIT_SUCCESS;
 }
+
+int common_wait(double d){
+    double start; if(common_gettime(&start)) return EXIT_FAILURE;
+    double end; if(common_gettime(&end)) return EXIT_FAILURE;
+    while(end - start < d){
+        if(common_gettime(&end)) return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
+}

@@ -26,4 +26,6 @@ int common_set_starttime(micro_t micros_since_epoch);
  */
 int common_gettime(double *d);
 
+int common_wait(double d);
+
 #endif //COMMON_TIME_H_INCLUDED
