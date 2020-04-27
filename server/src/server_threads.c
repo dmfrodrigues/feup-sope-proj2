@@ -20,6 +20,17 @@ static pthread_mutex_t num_threads_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int num_processed_requests = 0;
 static pthread_mutex_t num_processed_requests_mutex = PTHREAD_MUTEX_INITIALIZER;
 
+int server_thread_answer(const message_t *m, const message_t *confirm){
+    int ret = EXIT_SUCCESS;
+    char privfifo_path[PATH_MAX];
+    if(sprintf(privfifo_path, "/tmp/%d.%lu", m->pid, m->tid) < 0) return EXIT_FAILURE;
+    int privfifo_fd = open(privfifo_path, O_WRONLY);
+    if(privfifo_fd < 0) return EXIT_FAILURE;
+    if(write(privfifo_fd, confirm, sizeof(message_t)) != sizeof(message_t)) ret = EXIT_FAILURE;
+    if(close(privfifo_fd)) ret = EXIT_FAILURE;
+    return ret;
+}
+
 void* server_thread_func(void *arg){
     int *ret = malloc(sizeof(int));
     *ret = EXIT_SUCCESS;
@@ -40,17 +51,9 @@ void* server_thread_func(void *arg){
     //     Confirm usage of bathroom
     if(output(&confirm, op_ENTER)) { *ret = EXIT_FAILURE; return ret; }
     //     Open, write and close private fifo
-    char privfifo_path[PATH_MAX];
-    sprintf(privfifo_path, "/tmp/%d.%lu", m->pid, m->tid);
-    int privfifo_fd = open(privfifo_path, O_WRONLY);
-    write(privfifo_fd, &confirm, sizeof(message_t));
-    close(privfifo_fd);
+    if(server_thread_answer(m, &confirm)) { *ret = EXIT_FAILURE; return ret; }
     //     Actually use bathroom
-    double start; if(common_gettime(&start)) { *ret = EXIT_FAILURE; return ret; }
-    double end; if(common_gettime(&end)) { *ret = EXIT_FAILURE; return ret; }
-    while(end - start < m->dur){
-        if(common_gettime(&end)) { *ret = EXIT_FAILURE; return ret; }
-    }
+    if(common_wait(m->dur));
     //     Finished using the bathroom
     if(output(&confirm, op_TIMUP)) { *ret = EXIT_FAILURE; return ret; }
     //Routine stuff
