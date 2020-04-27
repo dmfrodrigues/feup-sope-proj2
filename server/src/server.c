@@ -56,8 +56,8 @@ int main(int argc, char *argv[]){
             else               return EXIT_FAILURE;
         }
         // Read messages
-        int r = read(fifo_des, &m, sizeof(message_t));
-        if(r == sizeof(message_t)){
+        int r;
+        while((r = read(fifo_des, &m, sizeof(message_t))) == sizeof(message_t)){
             if(output(&m, op_RECVD)){ ret = EXIT_FAILURE; break; }
             if(server_create_thread(&m)){ ret = EXIT_FAILURE; break; }
         }
