@@ -24,12 +24,17 @@ int init(int argc, char* argv[]){
     if(server_args_ctor(&args, argc, argv, 1000000)) return EXIT_FAILURE;
     if(server_install_handlers()) return EXIT_FAILURE;
     if(common_starttime(NULL)) return EXIT_FAILURE;
+    if(server_threads_init()) return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
 
 void cleanup(void){
     if(server_args_dtor(&args)){
         const char *buf = "Could not destruct args\n";
+        write(STDERR_FILENO, buf, strlen(buf));
+    }
+    if(server_threads_clean()){
+        const char *buf = "Could not clean server threads\n";
         write(STDERR_FILENO, buf, strlen(buf));
     }
 }

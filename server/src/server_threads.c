@@ -1,6 +1,7 @@
 #include "server_threads.h"
 
 #include "common_time.h"
+#include "common_atomic.h"
 #include "output.h"
 
 #include <stdlib.h>
@@ -19,6 +20,16 @@ static pthread_mutex_t num_threads_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static int num_processed_requests = 0;
 static pthread_mutex_t num_processed_requests_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+int server_threads_init(void){
+
+    return EXIT_SUCCESS;
+}
+
+int server_threads_clean(void){
+
+    return EXIT_SUCCESS;
+}
 
 int server_thread_answer(const message_t *m, const message_t *confirm){
     int ret = EXIT_SUCCESS;

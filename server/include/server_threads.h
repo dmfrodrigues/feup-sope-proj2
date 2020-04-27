@@ -3,6 +3,10 @@
 
 #include "message.h"
 
+int server_threads_init(void);
+
+int server_threads_clean(void);
+
 int server_create_thread(const message_t *m);
 
 int server_wait_all_threads(void);
