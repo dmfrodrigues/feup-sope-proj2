@@ -21,7 +21,7 @@ CFLAGS_PARANOID =-Wall -Wextra -Wformat-nonliteral -Wcast-align -Wpointer-arith 
 # CFLAGS =-Wall -g #-O3
 CFLAGS=$(CFLAGS_PARANOID)
 
-O_FILES=$(ODIR)/output.o $(ODIR)/common_time.o $(ODIR)/utils.o
+O_FILES=$(ODIR)/output.o $(ODIR)/common_time.o $(ODIR)/utils.o $(ODIR)/common_atomic.o
 
 all: makefolders $(LIB)
 
