@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
-
+#include <unistd.h>
 
 #include "client_args.h"
-#include "client_thread.h"
+#include "client_threads.h"
 #include "common_time.h"
 #include "utils.h"
 
@@ -16,11 +16,16 @@ client_args_t c_args;
 
 int client_init(int argc, char *argv[]){
     client_args_ctor(&c_args, argc, argv);
+    if(client_threads_init()) return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
 
 void client_clean(void){
     client_args_dtor(&c_args);
+    if(client_threads_clear()){
+        const char *buf = "Could not clear client threads\n";
+        write(STDERR_FILENO, buf, strlen(buf));
+    }
 }
 
 int main(int argc, char *argv[]){

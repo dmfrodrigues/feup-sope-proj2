@@ -1,6 +1,7 @@
-#include "client_thread.h"
+#include "client_threads.h"
 #include "client_thread_args.h"
 #include "output.h"
+#include "common_atomic.h"
 
 #include <pthread.h>
 #include <linux/limits.h>
@@ -35,13 +36,22 @@ int client_send_request(char *pathname, message_t to_send) {
     return EXIT_SUCCESS;
 }
 
-static int num_threads = 0;
-static pthread_mutex_t num_threads_mutex = PTHREAD_MUTEX_INITIALIZER;
+static atomic_lli_t *num_threads = NULL;
+
+int client_threads_init(void){
+    num_threads = atomic_lli_ctor();
+
+    return EXIT_SUCCESS;
+}
+
+int client_threads_clear(void){
+    atomic_lli_dtor(num_threads); num_threads = NULL;
+
+    return EXIT_SUCCESS;
+}
 
 void *client_execute_thread(void *arg) {
-    pthread_mutex_lock(&num_threads_mutex);
-    ++num_threads;
-    pthread_mutex_unlock(&num_threads_mutex);
+    atomic_lli_postinc(num_threads);
 
     int *ret = malloc(sizeof(int)); *ret = EXIT_SUCCESS;
     client_thread_args_t *args = (client_thread_args_t *)arg;
@@ -79,9 +89,7 @@ void *client_execute_thread(void *arg) {
     if(client_thread_args_dtor(args)){ *ret = EXIT_FAILURE; return ret; }
     free(args);
     // Return
-    pthread_mutex_lock(&num_threads_mutex);
-    --num_threads;
-    pthread_mutex_unlock(&num_threads_mutex);
+    atomic_lli_postdec(num_threads);
     return ret;
 }
 
@@ -89,9 +97,7 @@ void *client_execute_thread(void *arg) {
 
 int client_wait_all_threads(void){
     while(true){
-        pthread_mutex_lock(&num_threads_mutex);
-        if(num_threads <= 0){ pthread_mutex_unlock(&num_threads_mutex); return EXIT_SUCCESS;}
-        pthread_mutex_unlock(&num_threads_mutex);
+        if(atomic_lli_get(num_threads) <= 0) return EXIT_SUCCESS;
         if(usleep(SLEEP_MICROSECONDS)) return EXIT_FAILURE;
     }
 }

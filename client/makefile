@@ -20,7 +20,7 @@ CFLAGS_PARANOID =-Wall -Wextra -Wformat-nonliteral -Wcast-align -Wpointer-arith 
 CFLAGS =-Wall -g #-O3
 #CFLAGS=$(CFLAGS_PARANOID)
 
-O_FILES =$(ODIR)/client_args.o $(ODIR)/client_thread_args.o $(ODIR)/client_thread.o
+O_FILES =$(ODIR)/client_args.o $(ODIR)/client_thread_args.o $(ODIR)/client_threads.o
 O_MAIN_FILE=$(ODIR)/client.o
 
 all: $(APP)

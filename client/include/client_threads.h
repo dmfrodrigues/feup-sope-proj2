@@ -7,6 +7,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+int client_threads_init(void);
+
+int client_threads_clear(void);
+
 /**
  * @brief Function used by the previously created thread
  * 
