@@ -15,18 +15,20 @@
 
 #define SLEEP_MICROSECONDS 100000
 
-static int num_threads = 0;
-static pthread_mutex_t num_threads_mutex = PTHREAD_MUTEX_INITIALIZER;
+atomic_lli_t *num_threads = NULL;
 
-static int num_processed_requests = 0;
-static pthread_mutex_t num_processed_requests_mutex = PTHREAD_MUTEX_INITIALIZER;
+atomic_lli_t* num_processed_requests = NULL;
 
 int server_threads_init(void){
+    num_threads = atomic_lli_ctor();
+    num_processed_requests = atomic_lli_ctor();
 
     return EXIT_SUCCESS;
 }
 
 int server_threads_clean(void){
+    atomic_lli_dtor(num_threads); num_threads = NULL;
+    atomic_lli_dtor(num_processed_requests); num_processed_requests = NULL;
 
     return EXIT_SUCCESS;
 }
@@ -55,9 +57,7 @@ void* server_thread_func(void *arg){
             confirm.pid = getpid();
             confirm.tid = pthread_self();
             confirm.dur = m->dur;
-            pthread_mutex_lock(&num_processed_requests_mutex);
-            confirm.pl = num_processed_requests++;
-            pthread_mutex_unlock(&num_processed_requests_mutex);
+            confirm.pl = atomic_lli_postinc(num_processed_requests);
         }
         // Confirm usage of bathroom
         if(output(&confirm, op_ENTER)) { *ret = EXIT_FAILURE; return ret; }
@@ -69,17 +69,13 @@ void* server_thread_func(void *arg){
         if(output(&confirm, op_TIMUP)) { *ret = EXIT_FAILURE; return ret; }
     }
     //Routine stuff
-    pthread_mutex_lock(&num_threads_mutex);
-    --num_threads;
-    pthread_mutex_unlock(&num_threads_mutex);
     free(arg);
+    atomic_lli_postdec(num_threads);
     return ret;
 }
 
 int server_create_thread(const message_t *m){
-    pthread_mutex_lock(&num_threads_mutex);
-    ++num_threads;
-    pthread_mutex_unlock(&num_threads_mutex);
+    atomic_lli_postinc(num_threads);
 
     message_t *m_ = malloc(sizeof(message_t));
     *m_ = *m;
@@ -92,9 +88,7 @@ int server_create_thread(const message_t *m){
 
 int server_wait_all_threads(void){
     while(true){
-        pthread_mutex_lock(&num_threads_mutex);
-        if(num_threads <= 0){ pthread_mutex_unlock(&num_threads_mutex); return EXIT_SUCCESS;}
-        pthread_mutex_unlock(&num_threads_mutex);
+        if(atomic_lli_get(num_threads) <= 0) return EXIT_SUCCESS;
         if(usleep(SLEEP_MICROSECONDS)) return EXIT_FAILURE;
     }
 }
