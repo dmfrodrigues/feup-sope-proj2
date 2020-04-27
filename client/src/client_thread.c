@@ -51,14 +51,19 @@ void *client_execute_thread(void *arg) {
     // Send request via fifoname
     if (client_send_request(args->public_fifoname, m) != EXIT_SUCCESS){ *ret = EXIT_FAILURE; return ret; }
 
-    // // Open private fifo
-    // int privfifo_fd = open(privfifo_path, O_RDONLY);
-    // if (privfifo_fd == -1){ *ret = EXIT_FAILURE; return ret; }
-    // // Receive answer
-    // message_t ans;
-    // if(read(privfifo_fd, &ans, sizeof(message_t)) != sizeof(message_t)){ *ret = EXIT_FAILURE; return ret; }
-    // // Close private fifo
-    // close(privfifo_fd);
+    // Open private fifo
+    int privfifo_fd = open(privfifo_path, O_RDONLY);
+    if (privfifo_fd == -1){ *ret = EXIT_FAILURE; return ret; }
+    // Receive answer
+    message_t ans;
+    if(read(privfifo_fd, &ans, sizeof(message_t)) != sizeof(message_t)){ *ret = EXIT_FAILURE; return ret; }
+    if(ans.pl != -1) {
+        if(output(&ans, op_IAMIN));
+    } else {
+        if(output(&ans, op_CLOSD));
+    }
+    // Close private fifo
+    close(privfifo_fd);
 
     // Delete fifo
     unlink(privfifo_path);

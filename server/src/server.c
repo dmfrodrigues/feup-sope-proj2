@@ -2,6 +2,7 @@
 #include "server_signal.h"
 #include "message.h"
 #include "output.h"
+#include "server_threads.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,6 +14,8 @@
 #include <errno.h>
 #include <stdbool.h>
 
+#include "common_time.h"
+
 #define MAX_THREADS 1000000
 
 server_args_t args;
@@ -20,6 +23,7 @@ server_args_t args;
 int init(int argc, char* argv[]){
     if(server_args_ctor(&args, argc, argv, 1000000)) return EXIT_FAILURE;
     if(server_install_handlers()) return EXIT_FAILURE;
+    if(common_starttime(NULL)) return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
 
@@ -30,7 +34,7 @@ void cleanup(void){
     }
 }
 
-bool stop = false;
+bool timeup = false;
 
 int main(int argc, char *argv[]){
     int ret = EXIT_SUCCESS;
@@ -42,29 +46,29 @@ int main(int argc, char *argv[]){
     
     mkfifo(args.fifoname, 0660);
     
-    while(!stop){
+    
+    message_t m;
+    while(!timeup){
+        // Open public fifo
         int fifo_des = open(args.fifoname, O_RDONLY);
         if(fifo_des == -1){
             if(unlink(args.fifoname)) ret = EXIT_FAILURE;
             if(errno == EINTR) break;
             else               return EXIT_FAILURE;
         }
-
-        int r;
-        message_t m;
-        while((r = read(fifo_des, &m, sizeof(message_t))) == sizeof(message_t)){
-            // printf("L51, r=%d\n", r);
-            if(r == sizeof(message_t)){
-                if(output(&m, op_RECVD)){ ret = EXIT_FAILURE; break; }
-            }
-            
+        // Read messages
+        int r = read(fifo_des, &m, sizeof(message_t));
+        if(r == sizeof(message_t)){
+            if(output(&m, op_RECVD)){ ret = EXIT_FAILURE; break; }
+            if(server_create_thread(&m)){ ret = EXIT_FAILURE; break; }
         }
-        if(r != 0){ ret = EXIT_FAILURE; break; }
-        if(errno == EINTR){ stop = true; }
+        // Close public fifo
         close(fifo_des);
     }
 
     if(unlink(args.fifoname)) ret = EXIT_FAILURE;
+
+    if(server_wait_all_threads()) ret = EXIT_FAILURE;
 
     return ret;
 }

@@ -15,6 +15,22 @@
 
 ### Implementation details
 
+### Development
+
+To perform a simple test, run this command:
+```sh
+server -t 10 /tmp/fifo
+```
+and 1 second after that run
+```sh
+client -t 1 /tmp/fifo
+```
+and another 1 second after that run
+```sh
+client -t 1 /tmp/fifo
+```
+
+
 ## Make commands
 ### Compile
 
