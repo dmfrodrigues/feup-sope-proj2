@@ -39,7 +39,7 @@ int server_thread_answer(const message_t *m, const message_t *confirm){
     char privfifo_path[PATH_MAX];
     if(sprintf(privfifo_path, "/tmp/%d.%lu", m->pid, m->tid) < 0) return EXIT_FAILURE;
     int privfifo_fd = open(privfifo_path, O_WRONLY);
-    if(privfifo_fd < 0) return EXIT_FAILURE;
+    if(privfifo_fd < 0) { output(m, op_GAVUP); return EXIT_FAILURE; }
     if(write(privfifo_fd, confirm, sizeof(message_t)) != sizeof(message_t)) ret = EXIT_FAILURE;
     if(close(privfifo_fd)) ret = EXIT_FAILURE;
     return ret;
