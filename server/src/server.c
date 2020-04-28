@@ -19,7 +19,7 @@
 #define MAX_THREADS 1000000
 
 server_args_t args;
-volatile sig_atomic_t timeup = false;
+volatile sig_atomic_t timeup_server = false;
 
 int init(int argc, char* argv[]){
     if(server_args_ctor(&args, argc, argv, 1000000)) return EXIT_FAILURE;
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]){
     
     
     message_t m;
-    while(!timeup){
+    while(!timeup_server){
         // Open public fifo
         int fifo_des = open(args.fifoname, O_RDONLY);
         if(fifo_des == -1){

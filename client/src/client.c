@@ -7,20 +7,25 @@
 #include "client_args.h"
 #include "client_threads.h"
 #include "common_time.h"
+#include "common_atomic.h"
+#include "client_time.h"
 #include "utils.h"
 
 #define NANOSECOND_MULT     1000000 // from ms to ns
 #define MILLISECOND_MULT    1000    // from sec to ms
 
 client_args_t c_args;
+atomic_lli_t *timeup_client = NULL;
 
 int client_init(int argc, char *argv[]){
+    timeup_client = atomic_lli_ctor();
     client_args_ctor(&c_args, argc, argv);
     if(client_threads_init()) return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
 
 void client_clean(void){
+    atomic_lli_dtor(timeup_client);
     client_args_dtor(&c_args);
     if(client_threads_clear()){
         const char *buf = "Could not clear client threads\n";
@@ -38,7 +43,7 @@ int main(int argc, char *argv[]){
     double time = 0; if(common_gettime(&time)) return EXIT_FAILURE; // Get initial value for timer
     // Launch threads
     int res = 0;
-    for(int n = 0; time < run_ms; (res = common_gettime(&time)), ++n){
+    for(int n = 0; time < run_ms && !atomic_lli_get(timeup_client); (res = common_gettime(&time)), ++n){
         if(res) return EXIT_FAILURE;
         // Waiting between requests
         struct timespec to_wait = {

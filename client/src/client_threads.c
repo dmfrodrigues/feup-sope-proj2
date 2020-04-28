@@ -2,6 +2,8 @@
 #include "client_thread_args.h"
 #include "output.h"
 #include "common_atomic.h"
+#include "client_time.h"
+
 
 #include <pthread.h>
 #include <linux/limits.h>
@@ -91,6 +93,7 @@ void *client_execute_thread(void *arg) {
         if(output(&ans, op_IAMIN));
     } else {
         if(output(&ans, op_CLOSD));
+        atomic_lli_set(timeup_client, 1);
     }
     // Close private fifo
     close(privfifo_fd);

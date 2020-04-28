@@ -4,7 +4,7 @@
 #include <signal.h>
 #include <stdbool.h>
 
-extern volatile sig_atomic_t timeup;
+extern volatile sig_atomic_t timeup_server;
 
 /**
  * @brief Install handlers.
