@@ -36,4 +36,12 @@ int server_create_thread(const message_t *m);
  */
 int server_wait_all_threads(void);
 
+/**
+ * @brief Clears public FIFO "buffer" and closes server
+ * 
+ * @param fifoname public FIFO
+ * @return int EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
+ */
+int server_close_service(char* fifoname);
+
 #endif //SERVER_THREADS_H_INCLUDED

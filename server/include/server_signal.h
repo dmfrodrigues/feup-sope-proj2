@@ -1,6 +1,11 @@
 #ifndef SERVER_SIGNAL_H_INCLUDED
 #define SERVER_SIGNAL_H_INCLUDED
 
+#include <signal.h>
+#include <stdbool.h>
+
+extern volatile sig_atomic_t timeup;
+
 /**
  * @brief Install handlers.
  * 

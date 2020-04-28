@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <errno.h>
 
 #define SLEEP_MICROSECONDS 100000
 
@@ -91,4 +92,35 @@ int server_wait_all_threads(void){
         if(atomic_lli_get(num_threads) <= 0) return EXIT_SUCCESS;
         if(usleep(SLEEP_MICROSECONDS)) return EXIT_FAILURE;
     }
+}
+
+int server_close_service(char* fifoname){
+    int ret = EXIT_SUCCESS;
+    
+    // Open public fifo to clear "buffer"
+    int fifo_des = open(fifoname, O_RDONLY);
+    if(fifo_des == -1 && errno != EINTR) ret = EXIT_FAILURE;
+    
+    // Read one message (??)
+    int r;
+    message_t m;
+    while((r = read(fifo_des, &m, sizeof(message_t))) == sizeof(message_t)){
+        if(output(&m, op_2LATE)) ret = EXIT_FAILURE;
+
+        message_t confirm; {
+            confirm.i = m.i;
+            confirm.pid = getpid();
+            confirm.tid = pthread_self();
+            confirm.dur = -1;
+            confirm.pl = -1;
+        }
+        if (server_thread_answer(&m, &confirm)) ret = EXIT_FAILURE;
+    }        
+
+    close(fifo_des);
+    if(unlink(fifoname)) ret = EXIT_FAILURE;
+
+    if(server_wait_all_threads()) ret = EXIT_FAILURE;
+
+    return ret;
 }

@@ -19,6 +19,7 @@
 #define MAX_THREADS 1000000
 
 server_args_t args;
+volatile sig_atomic_t timeup = false;
 
 int init(int argc, char* argv[]){
     if(server_args_ctor(&args, argc, argv, 1000000)) return EXIT_FAILURE;
@@ -38,8 +39,6 @@ void cleanup(void){
         write(STDERR_FILENO, buf, strlen(buf));
     }
 }
-
-bool timeup = false;
 
 int main(int argc, char *argv[]){
     int ret = EXIT_SUCCESS;
@@ -69,10 +68,8 @@ int main(int argc, char *argv[]){
         // Close public fifo
         close(fifo_des);
     }
-
-    if(unlink(args.fifoname)) ret = EXIT_FAILURE;
-
-    if(server_wait_all_threads()) ret = EXIT_FAILURE;
+    
+    if (server_close_service(args.fifoname)) ret = EXIT_FAILURE;
 
     return ret;
 }

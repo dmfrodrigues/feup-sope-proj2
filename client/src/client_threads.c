@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <time.h>
+#include <errno.h>
 #include <stdbool.h>
 
 #define REQUEST_PL_FIELD    -1      // message_t pl field for request
@@ -25,7 +26,10 @@
 int client_send_request(char *pathname, message_t to_send) {
     // Open fifo for writing
     int fd_public_fifo = open(pathname, O_WRONLY);
-    if (fd_public_fifo == -1) return EXIT_FAILURE;
+    if (fd_public_fifo == -1) {
+        if (errno == ENOENT) return 2;
+        else return EXIT_FAILURE;
+    }
     // Write message to fifo
     if (write(fd_public_fifo, &to_send, sizeof(message_t)) == -1) return EXIT_FAILURE;
     // Close fifo
@@ -67,7 +71,15 @@ void *client_execute_thread(void *arg) {
     sprintf(privfifo_path, "/tmp/%d.%lu", getpid(), pthread_self());
     mkfifo(privfifo_path, 0660);
     // Send request via fifoname
-    if (client_send_request(args->public_fifoname, m) != EXIT_SUCCESS){ *ret = EXIT_FAILURE; return ret; }
+    int req;
+    if ((req = client_send_request(args->public_fifoname, m)) != EXIT_SUCCESS){ 
+        if (req == 2){
+            m.dur = -1;
+            m.pl = -1;
+            output(&m, op_FAILD);
+        }
+        *ret = EXIT_FAILURE; return ret; 
+    }
 
     // Open private fifo
     int privfifo_fd = open(privfifo_path, O_RDONLY);
