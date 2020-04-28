@@ -15,6 +15,13 @@ typedef enum {
     op_GAVUP
 } operation_t;
 
+/**
+ * @brief Output logs.
+ * 
+ * @param m     Message to print
+ * @param op    Operation to be registered
+ * @return int  EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
+ */
 int output(const message_t *m, operation_t op);
 
 #endif

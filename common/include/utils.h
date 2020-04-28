@@ -4,9 +4,9 @@
 /**
  * @brief Generates a random number in the range [lower, upper).
  * 
- * @param lower 
- * @param upper 
- * @return long 
+ * @param lower Lower bound
+ * @param upper Upper bound
+ * @return long Random number in that range
  */
 int random_range(int lower, int upper);
 
