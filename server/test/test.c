@@ -136,6 +136,12 @@ void test_server_args_ctor(void) {
 
 void test_server_exit_without_readers(void) {
     {
+        int ret = system("timeout 3 ./server -t 2 /tmp/fifo");
+        if(ret != 0) system("rm /tmp/fifo");
+        TEST_CHECK(ret == 0);
+        if(ret != 0) return;
+    }
+    {
         double start; get_seconds_since_epoch(&start);
         int ret = system("./server -t 2 /tmp/fifo");
         double finish; get_seconds_since_epoch(&finish);
