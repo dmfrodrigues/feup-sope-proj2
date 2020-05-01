@@ -98,8 +98,9 @@ int server_close_service(char* fifoname){
     int ret = EXIT_SUCCESS;
     
     // Open public fifo to clear "buffer"
-    int fifo_des = open(fifoname, O_RDONLY);
+    int fifo_des = open(fifoname, O_RDONLY | O_NONBLOCK);
     if(fifo_des == -1 && errno != EINTR) ret = EXIT_FAILURE;
+     
     
     // Read one message (??)
     int r;
