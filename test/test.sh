@@ -61,6 +61,7 @@ test_assert_general () {
 test_assert_notend () {
 
     test_assert_general
+    if [ "$?" != "0" ] ; then return 1; fi
 
     nIWANT=`grep IWANT $CLOG | wc -l`
     nRECVD=`grep RECVD $SLOG | wc -l`
@@ -77,47 +78,48 @@ test_assert_notend () {
 
 test_assert_end () {
     test_assert_general
+    if [ "$?" != "0" ] ; then return 1; fi
 }
 
 test_notend1 () {
-    test_init "notend1"
 
     timeout 5 $SPROG -t 4 $FIFONAME >  $SLOG 2> $SERR &
     timeout 2 $CPROG -t 1 $FIFONAME >> $CLOG 2>> $CERR
+    if [ "$?" != "0" ] ; then return 1; fi
     timeout 2 $CPROG -t 1 $FIFONAME >> $CLOG 2>> $CERR
+    if [ "$?" != "0" ] ; then return 1; fi
     sleep 2
 
     test_assert_notend
-    ret=$?
-    test_print_outcome "$ret"
-    return $ret
+    if [ "$?" != "0" ] ; then return 1; fi
+
 }
 
 test_end1 () {
-    test_init "end1"
     ret=0
     timeout 5 $SPROG -t 4 $FIFONAME >  $SLOG 2> $SERR &
     timeout 4 $CPROG -t 3 $FIFONAME >> $CLOG 2>> $CERR
-    ret="$ret || $?"
+    if [ "$?" != "0" ] ; then return 1; fi
     timeout 4 $CPROG -t 3 $FIFONAME >> $CLOG 2>> $CERR
-    ret="$ret || $?"
-
+    if [ "$?" != "0" ] ; then return 1; fi
     test_assert_end
-    ret="$ret || $?"
-    test_print_outcome "$ret"
-    return $ret
+    if [ "$?" != "0" ] ; then return 1; fi
 }
 
 test_client1 () {
-    test_init "client1"
-
     timeout 3 $CPROG -t 2 $FIFONAME >  $SLOG 2> $SERR
+    if [ "$?" != "0" ] ; then return 1; fi
+}
 
-    ret=$?
+test_run() {
+    test_init "$1"
+    `$1`
+    ret="$?"
     test_print_outcome "$ret"
+    if [ "$ret" != "0" ]; then exit 1; fi
     return $ret
 }
 
-# test_notend1 || exit 1;
-# test_end1    || exit 1;
-test_client1 || exit 1;
+test_run "test_notend1"
+test_run "test_end1"
+test_run "test_client1"
