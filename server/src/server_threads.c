@@ -104,9 +104,11 @@ int server_close_service(char* fifoname){
     common_starttime(NULL); double t; common_gettime(&t);
     // Read one message (??)
     message_t m;
-    while(t <= 100.0){ printf("Hello, t = %f\n", t);
+    while(t <= 100.0){
         int r = read(fifo_des, &m, sizeof(message_t));
-        if(r == -1) break;
+        if(r == -1 && errno != EAGAIN){ 
+            break;
+        }
         if(r == sizeof(message_t)){
             if(output(&m, op_2LATE)) ret = EXIT_FAILURE;
             message_t confirm; {
@@ -121,9 +123,8 @@ int server_close_service(char* fifoname){
         }
         common_gettime(&t);
     }
-    printf("L124\n");
 
-    close(fifo_des); printf("L126\n");
+    close(fifo_des);
     if(unlink(fifoname)) ret = EXIT_FAILURE; printf("L127\n");
 
     if(server_wait_all_threads()) ret = EXIT_FAILURE; printf("L129\n");
