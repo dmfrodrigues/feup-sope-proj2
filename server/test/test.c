@@ -148,7 +148,7 @@ void test_server_exit_without_readers(void) {
         TEST_CHECK(ret == 0);
         double elapsed = finish-start;
         if (!TEST_CHECK(2.00 <= elapsed) ||
-            !TEST_CHECK(elapsed < 2.01)){
+            !TEST_CHECK(elapsed < 2.11)){
             TEST_MSG("Elapsed time: %f (should be around 2.0)", elapsed);
         }
     }

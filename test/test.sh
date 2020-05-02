@@ -121,5 +121,5 @@ test_run() {
 }
 
 test_run "test_notend1"
-test_run "test_end1"
 test_run "test_client1"
+test_run "test_end1"
