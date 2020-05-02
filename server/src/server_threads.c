@@ -101,27 +101,32 @@ int server_close_service(char* fifoname){
     int fifo_des = open(fifoname, O_RDONLY | O_NONBLOCK);
     if(fifo_des == -1 && errno != EINTR) ret = EXIT_FAILURE;
      
-    
+    common_starttime(NULL); double t; common_gettime(&t);
     // Read one message (??)
-    int r;
     message_t m;
-    while((r = read(fifo_des, &m, sizeof(message_t))) == sizeof(message_t)){
-        if(output(&m, op_2LATE)) ret = EXIT_FAILURE;
-
-        message_t confirm; {
-            confirm.i = m.i;
-            confirm.pid = getpid();
-            confirm.tid = pthread_self();
-            confirm.dur = -1;
-            confirm.pl = -1;
+    while(t <= 100.0){ printf("Hello, t = %f\n", t);
+        int r = read(fifo_des, &m, sizeof(message_t));
+        if(r == -1) break;
+        if(r == sizeof(message_t)){
+            if(output(&m, op_2LATE)) ret = EXIT_FAILURE;
+            message_t confirm; {
+                confirm.i = m.i;
+                confirm.pid = getpid();
+                confirm.tid = pthread_self();
+                confirm.dur = -1;
+                confirm.pl = -1;
+            }
+            if (server_thread_answer(&m, &confirm)) ret = EXIT_FAILURE;
+            break;
         }
-        if (server_thread_answer(&m, &confirm)) ret = EXIT_FAILURE;
-    }        
+        common_gettime(&t);
+    }
+    printf("L124\n");
 
-    close(fifo_des);
-    if(unlink(fifoname)) ret = EXIT_FAILURE;
+    close(fifo_des); printf("L126\n");
+    if(unlink(fifoname)) ret = EXIT_FAILURE; printf("L127\n");
 
-    if(server_wait_all_threads()) ret = EXIT_FAILURE;
+    if(server_wait_all_threads()) ret = EXIT_FAILURE; printf("L129\n");
 
     return ret;
 }
