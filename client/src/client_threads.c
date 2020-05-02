@@ -87,8 +87,9 @@ void *client_execute_thread(void *arg) {
             free(args);
             // Return
             atomic_lli_postdec(num_threads);
-            *ret = EXIT_FAILURE; return ret; 
+            *ret = EXIT_SUCCESS; return ret; 
         }
+        *ret = EXIT_FAILURE; return ret;
     }
 
     // Open private fifo
