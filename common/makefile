@@ -31,13 +31,14 @@ clean:
 	rm -rf $(ODIR)
 	rm -rf $(LDIR)
 
-test: all $(TSRC) $(LIB)
-	@echo Current directory: $(PWD)
+$(TAPP): $(TSRC) $(LIB)
 	$(CC) $(CFLAGS) $(IFLAGS) -I$(ACUTEST) -c $(TDIR)/$(TFILE).c -o $(ODIR)/$(TFILE).o
 	$(CC) $(ODIR)/$(TFILE).o -o $(TAPP) $(LFLAGS)
+
+test: ./$(TAPP)
 	./$(TAPP)
 
-testmem: all
+testmem: ./$(TAPP)
 	valgrind --leak-check=yes $(TAPP)
 
 makefolders:

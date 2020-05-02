@@ -29,7 +29,7 @@ clean:
 	rm -f $(CLIENTNEWAPP)
 	rm -f $(SERVERNEWAPP)
 
-test:
+test: all
 	make -C $(COMMONDIR) test
 	make -C $(CLIENTDIR) test
 	make -C $(SERVERDIR) test

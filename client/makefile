@@ -30,13 +30,14 @@ clean:
 	rm -f  $(APP)
 	rm -rf $(ODIR)
 
-test: all $(TSRC)
-	@echo Current directory: $(PWD)
+$(TAPP): all $(TSRC)
 	$(CC) $(CFLAGS) $(IFLAGS) -I$(ACUTEST) -c $(TDIR)/$(TFILE).c -o $(ODIR)/$(TFILE).o
 	$(CC) $(ODIR)/$(TFILE).o $(O_FILES) -o $(TAPP) $(LFLAGS)
+
+test: $(TAPP)
 	./$(TAPP)
 
-testmem: all
+testmem: $(TAPP)
 	valgrind --leak-check=yes $(TAPP)
 
 $(APP):   $(O_MAIN_FILE) $(O_FILES)
