@@ -1,3 +1,5 @@
+#!/bin/bash
+
 GREEN_INTENSIVE='\033[1;32m'
 RED_INTENSIVE='\033[1;31m'
 NC_INTENSIVE='\033[1m' # No Color
