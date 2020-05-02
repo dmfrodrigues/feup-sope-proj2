@@ -79,8 +79,16 @@ void *client_execute_thread(void *arg) {
             m.dur = -1;
             m.pl = -1;
             output(&m, op_FAILD);
+
+            // Delete fifo
+            unlink(privfifo_path);
+            // Free arguments
+            if(client_thread_args_dtor(args)){ *ret = EXIT_FAILURE; return ret; }
+            free(args);
+            // Return
+            atomic_lli_postdec(num_threads);
+            *ret = EXIT_FAILURE; return ret; 
         }
-        *ret = EXIT_FAILURE; return ret; 
     }
 
     // Open private fifo
