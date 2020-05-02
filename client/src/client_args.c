@@ -15,6 +15,8 @@ static const client_args_t client_args_default =
 
 static const char optstring[] = "t:";
 
+static const char fifo_prefix[] = "/tmp/";
+
 int client_args_ctor(client_args_t *p, int argc, char *argv[]){
     *p = client_args_default;
     char buf[1024];
@@ -43,8 +45,8 @@ int client_args_ctor(client_args_t *p, int argc, char *argv[]){
         return EXIT_FAILURE;
     }
 
-    p->fifoname = calloc(strlen(argv[optind])+1, sizeof(char));
-    strcpy(p->fifoname, argv[optind]);
+    p->fifoname = calloc(strlen(argv[optind])+strlen(fifo_prefix)+1, sizeof(char));
+    strcat(strcpy(p->fifoname, fifo_prefix), argv[optind]);
 
     return EXIT_SUCCESS;
 }

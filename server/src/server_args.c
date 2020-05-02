@@ -17,6 +17,8 @@ static const server_args_t server_args_default =
 
 static const char optstring[] = "t:l:n:";
 
+static const char fifo_prefix[] = "/tmp/";
+
 int server_args_ctor(server_args_t *p, int argc, char *argv[], int max_threads){
     *p = server_args_default;
     p->nthreads = max_threads;
@@ -49,8 +51,8 @@ int server_args_ctor(server_args_t *p, int argc, char *argv[], int max_threads){
         return EXIT_FAILURE;
     }
 
-    p->fifoname = calloc(strlen(argv[optind])+1, sizeof(char));
-    strcpy(p->fifoname, argv[optind]);
+    p->fifoname = calloc(strlen(argv[optind])+strlen(fifo_prefix)+1, sizeof(char));
+    strcat(strcpy(p->fifoname, fifo_prefix), argv[optind]);
 
     return EXIT_SUCCESS;
 }

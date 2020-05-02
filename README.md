@@ -19,15 +19,15 @@
 
 To perform a simple test, run this command:
 ```sh
-server -t 10 /tmp/fifo
+server -t 10 fifo
 ```
 and 1 second after that run
 ```sh
-client -t 1 /tmp/fifo
+client -t 1 fifo
 ```
 and another 1 second after that run
 ```sh
-client -t 1 /tmp/fifo
+client -t 1 fifo
 ```
 
 

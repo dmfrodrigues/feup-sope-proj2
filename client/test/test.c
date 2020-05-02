@@ -87,7 +87,7 @@ void test_client_args_ctor6(void) {
     client_args_t args;
     TEST_CHECK(client_args_ctor(&args, argc, argv) == EXIT_SUCCESS);
     TEST_CHECK(args.nsecs == 2);
-    TEST_CHECK(strcmp(args.fifoname, "fifopath") == 0);
+    TEST_CHECK(strcmp(args.fifoname, "/tmp/fifopath") == 0);
     TEST_CHECK(client_args_dtor(&args) == EXIT_SUCCESS);
 
     free_argv(argc, argv);
@@ -101,7 +101,7 @@ void test_client_args_ctor7(void) {
     client_args_t args;
     TEST_CHECK(client_args_ctor(&args, argc, argv) == EXIT_SUCCESS);
     TEST_CHECK(args.nsecs == 2);
-    TEST_CHECK(strcmp(args.fifoname, "fifopath") == 0);
+    TEST_CHECK(strcmp(args.fifoname, "/tmp/fifopath") == 0);
     TEST_CHECK(client_args_dtor(&args) == EXIT_SUCCESS);
 
     free_argv(argc, argv);

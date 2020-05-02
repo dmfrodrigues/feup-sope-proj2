@@ -96,7 +96,7 @@ void test_server_args_ctor(void) {
         TEST_CHECK(args.nsecs == 2);
         TEST_CHECK(args.nplaces == 3);
         TEST_CHECK(args.nthreads == 4);
-        TEST_CHECK(strcmp(args.fifoname, "fifopath") == 0);
+        TEST_CHECK(strcmp(args.fifoname, "/tmp/fifopath") == 0);
         TEST_CHECK(server_args_dtor(&args) == EXIT_SUCCESS);
 
         free_argv(argc, argv);
@@ -110,7 +110,7 @@ void test_server_args_ctor(void) {
         server_args_t args;
         TEST_CHECK(server_args_ctor(&args, argc, argv, MAX_THREADS) == EXIT_SUCCESS);
         TEST_CHECK(args.nsecs == 2);
-        TEST_CHECK(strcmp(args.fifoname, "fifopath") == 0);
+        TEST_CHECK(strcmp(args.fifoname, "/tmp/fifopath") == 0);
         TEST_CHECK(args.nplaces == 3);
         TEST_CHECK(args.nthreads == 4);
         TEST_CHECK(server_args_dtor(&args) == EXIT_SUCCESS);
@@ -127,7 +127,7 @@ void test_server_args_ctor(void) {
         TEST_CHECK(args.nsecs == 5);
         TEST_CHECK(args.nplaces == INT_MAX);
         TEST_CHECK(args.nthreads == MAX_THREADS);
-        TEST_CHECK(strcmp(args.fifoname, "fifopath") == 0);
+        TEST_CHECK(strcmp(args.fifoname, "/tmp/fifopath") == 0);
         TEST_CHECK(server_args_dtor(&args) == EXIT_SUCCESS);
 
         free_argv(argc, argv);
@@ -136,14 +136,14 @@ void test_server_args_ctor(void) {
 
 void test_server_exit_without_readers(void) {
     {
-        int ret = system("timeout 3 ./server -t 2 /tmp/fifo");
+        int ret = system("timeout 3 ./server -t 2 fifo");
         if(ret != 0) system("rm /tmp/fifo");
         TEST_CHECK(ret == 0);
         if(ret != 0) return;
     }
     {
         double start; get_seconds_since_epoch(&start);
-        int ret = system("./server -t 2 /tmp/fifo");
+        int ret = system("./server -t 2 fifo");
         double finish; get_seconds_since_epoch(&finish);
         TEST_CHECK(ret == 0);
         double elapsed = finish-start;
