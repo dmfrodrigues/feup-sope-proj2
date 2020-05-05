@@ -6,12 +6,13 @@
 
 - **Project name:** Informatic access to Bathrooms
 - **Short description:** Server-client to handle conflicts over common resources (in this case, bathroom places)
-- **Institution:** FEUP
-- **Course:** SOPE (Operating Systems)
+- **Institution:** [FEUP](https://sigarra.up.pt/feup/en/web_page.Inicial)
+- **Course:** [SOPE](https://sigarra.up.pt/feup/en/UCURR_GERAL.FICHA_UC_VIEW?pv_ocorrencia_id=436440) (Operating Systems)
+<!-- - **Project grade:** ??/20 -->
 - **Group members:**
-    - Diogo Miguel Ferreira Rodrigues (diogo.rodrigues@fe.up.pt / up201806429@fe.up.pt)
-    - João António Cardoso Vieira e Basto de Sousa (up201806613@fe.up.pt)
-    - Rafael Soares Ribeiro (up201806330@fe.up.pt)
+    - [Diogo Miguel Ferreira Rodrigues](https://github.com/dmfrodrigues) ([diogo.rodrigues@fe.up.pt](mailto:diogo.rodrigues@fe.up.pt)/[up201806429@fe.up.pt](mailto:up201806429@fe.up.pt))
+    - [João António Cardoso Vieira e Basto de Sousa](https://github.com/JoaoASousa) ([up201806613@fe.up.pt](up201806613@fe.up.pt))
+    - [Rafael Soares Ribeiro](https://github.com/up201806330) ([up201806330@fe.up.pt](mailto:up201806330@fe.up.pt))
 
 ### Implementation details
 
