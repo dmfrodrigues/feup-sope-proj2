@@ -19,7 +19,7 @@ atomic_lli_t *timeup_client = NULL;
 
 int client_init(int argc, char *argv[]){
     timeup_client = atomic_lli_ctor();
-    client_args_ctor(&c_args, argc, argv);
+    if(client_args_ctor(&c_args, argc, argv)) return EXIT_FAILURE;
     if(client_threads_init()) return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
