@@ -33,7 +33,7 @@ test: all
 	make -C $(COMMONDIR) test
 	make -C $(CLIENTDIR) test
 	make -C $(SERVERDIR) test
-	chmod u+x test/*.sh
+	chmod u+x **/*.sh
 	test/test.sh
 
 testmem:

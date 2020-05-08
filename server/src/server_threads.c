@@ -110,6 +110,7 @@ int server_close_service(char* fifoname){
             break;
         }
         if(r == sizeof(message_t)){
+            if(output(&m, op_RECVD)) ret = EXIT_FAILURE;
             if(output(&m, op_2LATE)) ret = EXIT_FAILURE;
             message_t confirm; {
                 confirm.i = m.i;
