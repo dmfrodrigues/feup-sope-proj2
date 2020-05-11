@@ -38,8 +38,8 @@ if [ $nIWANT != $nRECVD ]; then
 	echo "nIWANT=${nIWANT} != nRECVD=${nRECVD}"
 	ret=1
 fi
-if [ $nRECVD != $((nIAMIN + nCLOSD + nFAILD)) ]; then
-	echo "nRECVD=${nRECVD} != (nIAMIN=${nIAMIN} + nCLOSD=${nCLOSD} + nFAILD=${nFAILD})"
+if [ $nRECVD != $((nIAMIN + nCLOSD)) ]; then
+	echo "nRECVD=${nRECVD} != (nIAMIN=${nIAMIN} + nCLOSD=${nCLOSD})"
 	ret=1
 fi
 # if [ $nRECVD != `expr $nIAMIN + $nCLOSD + $nFAILD` ]
