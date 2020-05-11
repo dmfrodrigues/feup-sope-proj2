@@ -57,10 +57,10 @@ if [ $nCLOSD != $n2LATE ]; then
 	echo "nCLOSD=${nCLOSD} != n2LATE=${n2LATE}"
 	ret=1
 fi
-if [ $nFAILD != $nGAVUP ]; then
-	echo "nFAILD=${nFAILD} != nGAVUP=${nGAVUP}"
-	ret=1
-fi
+# if [ $nFAILD != $nGAVUP ]; then
+# 	echo "nFAILD=${nFAILD} != nGAVUP=${nGAVUP}"
+# 	ret=1
+# fi
 
 if [ $nIWANT = 0 ]
 then echo -n "nIWANT=${nIWANT} "
