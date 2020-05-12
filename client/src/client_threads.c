@@ -32,13 +32,9 @@ int client_send_request(char *pathname, message_t to_send) {
         if (errno == ENOENT) return 2;
         else return EXIT_FAILURE;
     }
-    // Write message to fifo
-    if (write(fd_public_fifo, &to_send, sizeof(message_t)) == -1) return EXIT_FAILURE;
-    // Close fifo
-    close(fd_public_fifo);
-    // Log
-    if(output(&to_send, op_IWANT)) return EXIT_FAILURE;
-    // Return
+    if (write(fd_public_fifo, &to_send, sizeof(message_t)) == -1)   return EXIT_FAILURE;    // Write message to fifo
+    if (close(fd_public_fifo))                                      return EXIT_FAILURE;    // Close fifo
+    if (output(&to_send, op_IWANT))                                 return EXIT_FAILURE;    // Log
     return EXIT_SUCCESS;
 }
 
