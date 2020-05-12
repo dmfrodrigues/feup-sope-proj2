@@ -11,42 +11,37 @@
 #include "client_time.h"
 #include "utils.h"
 
-#define NANOSECOND_MULT     1000000 // from ms to ns
-#define MILLISECOND_MULT    1000    // from sec to ms
+#define SECONDS_TO_MILLIS   1000    // from sec to ms
 
-client_args_t c_args;
-atomic_lli_t *timeup_client = NULL;
+client_args_t args;                                                         // Arguments structure
+atomic_lli_t *timeup_client = NULL;                                         // Is 1 if operation time is over, 0 otherwise
 
 int main(int argc, char *argv[]){
     // Initialize
-    timeup_client = atomic_lli_ctor();
-    if(client_args_ctor(&c_args, argc, argv)) return EXIT_FAILURE;
-    if(client_threads_init()) return EXIT_FAILURE;
+    timeup_client = atomic_lli_ctor();                                      // Construct timeup_client
+    if(client_args_ctor(&args, argc, argv)) return EXIT_FAILURE;            // Construct arguments structure from argc/argv
+    if(client_threads_init())               return EXIT_FAILURE;            // Initialize threads
     // Time
-    const double run_ms = MILLISECOND_MULT * c_args.nsecs;      // Time to run program
-    if(common_starttime(NULL)) return EXIT_FAILURE;             // Start timer
-    double time = 0; if(common_gettime(&time)) return EXIT_FAILURE; // Get initial value for timer
+    const double runtime_ms = SECONDS_TO_MILLIS * args.nsecs;               // Runtime of the program
+    double start_time; if(common_gettime(&start_time)) return EXIT_FAILURE; // Start time
+    double now_time;   if(common_gettime(&now_time))   return EXIT_FAILURE; // Time now
     // Launch threads
-    int res = 0;
-    for(int n = 0; time < run_ms && !atomic_lli_get(timeup_client); (res = common_gettime(&time)), ++n){
-        if(res) return EXIT_FAILURE;
+    for(int res = EXIT_SUCCESS, n = 0;
+        !res && (now_time - start_time) < runtime_ms && !atomic_lli_get(timeup_client);
+        res = common_gettime(&now_time), ++n){
         // Waiting between requests
-        struct timespec to_wait = {
-            .tv_sec = 0,
-            .tv_nsec = NANOSECOND_MULT*random_range(10, 20)
-        };
-        if (nanosleep(&to_wait, NULL)) return EXIT_FAILURE;
+        if(common_wait(random_range(10, 20))) return EXIT_FAILURE;
         // Create thread
-        client_thread_args_t *args = malloc(sizeof(client_thread_args_t));
-        if(client_thread_args_ctor(args, n, random_range(100, 200), c_args.fifoname)) return EXIT_FAILURE;
+        client_thread_args_t *thread_args = malloc(sizeof(client_thread_args_t));
+        if(client_thread_args_ctor(thread_args, n, random_range(100, 200), args.fifoname)) return EXIT_FAILURE;
         pthread_t dummy;
-        pthread_create(&dummy, NULL, client_execute_thread, args);
+        pthread_create(&dummy, NULL, client_execute_thread, thread_args);
     }
 
     client_wait_all_threads();
     // Cleanup
     atomic_lli_dtor(timeup_client);
-    client_args_dtor(&c_args);
+    client_args_dtor(&args);
     if(client_threads_clear()) return EXIT_FAILURE;
 
     return EXIT_SUCCESS;
