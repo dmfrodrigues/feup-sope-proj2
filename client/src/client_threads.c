@@ -60,6 +60,10 @@ void *client_execute_thread(void *arg) {
     m.tid = pthread_self();
     m.dur = args->dur;
     m.pl  = REQUEST_PL_FIELD;
+    // Create private fifo
+    char private_fifo_path[PATH_MAX];
+    sprintf(private_fifo_path, "/tmp/%d.%lu", getpid(), pthread_self());
+    mkfifo(private_fifo_path, 0660);
     // Send request via fifoname
     int req;
     if ((req = client_send_request(args->public_fifoname, m)) != EXIT_SUCCESS){ 
@@ -67,16 +71,13 @@ void *client_execute_thread(void *arg) {
             m.dur = -1;
             m.pl = -1;
             if(output(&m, op_FAILD))            {*ret = EXIT_FAILURE; return ret; }             // Output FAILD message
+            if(unlink(private_fifo_path))       {*ret = EXIT_FAILURE; return ret; }             // Delete fifo
             if(client_thread_args_dtor(args))   {*ret = EXIT_FAILURE; return ret; } free(args); // Free arguments
             atomic_lli_postdec(num_threads);                                                    // Decrement number of threads
             *ret = EXIT_SUCCESS; return ret; 
         }
         *ret = EXIT_FAILURE; return ret;
     }
-    // Create private fifo
-    char private_fifo_path[PATH_MAX];
-    sprintf(private_fifo_path, "/tmp/%d.%lu", getpid(), pthread_self());
-    mkfifo(private_fifo_path, 0660);
     // Open private fifo
     int private_fifo_filedes = open(private_fifo_path, O_RDONLY); 
     if (private_fifo_filedes == -1){ *ret = EXIT_FAILURE; return ret; }
