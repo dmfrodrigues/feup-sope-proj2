@@ -21,9 +21,9 @@ int main(int argc, char *argv[]){
     if(client_args_ctor(&args, argc, argv))         return EXIT_FAILURE;                // Construct arguments structure from argc/argv
     if(client_threads_init())                       return EXIT_FAILURE;                // Initialize threads
     // Time
-    const double runtime_ms = SECONDS_TO_MILLIS * args.nsecs;                           // Runtime of the program
-    double start_time; if(common_gettime(&start_time)) return EXIT_FAILURE;             // Start time
-    double now_time;   if(common_gettime(&now_time))   return EXIT_FAILURE;             // Time now
+    const milli_t runtime_ms = SECONDS_TO_MILLIS * args.nsecs;                          // Runtime of the program
+    milli_t start_time; if(common_gettime(&start_time)) return EXIT_FAILURE;            // Start time
+    milli_t now_time;   if(common_gettime(&now_time))   return EXIT_FAILURE;            // Time now
     // Launch threads
     for(int res = EXIT_SUCCESS, n = 0;                                                  // res is used to check for errors in common_gettime; n is the request number
         !res && (now_time - start_time) < runtime_ms && !atomic_lli_get(timeup_client); // While there is no error, time has not run out and we were not notified of the bathroom closing
