@@ -66,7 +66,7 @@ void* server_thread_func(void *arg){
             confirm.pid = getpid();
             confirm.tid = pthread_self();
             confirm.dur = m->dur;
-            //confirm.pl = atomic_lli_postinc(num_processed_requests);
+            confirm.pl = m->pl;
         }
         // Confirm usage of bathroom
         if(output(&confirm, op_ENTER)) { *ret = EXIT_FAILURE; return ret; }
