@@ -23,11 +23,6 @@ int common_starttime(micro_t *micros_since_epoch){
     return EXIT_SUCCESS;
 }
 
-int common_set_starttime(micro_t micros_since_epoch){
-    microseconds_since_epoch = micros_since_epoch;
-    return EXIT_SUCCESS;
-}
-
 int common_gettime(double *d){
     if(d == NULL){
         errno = EINVAL;
