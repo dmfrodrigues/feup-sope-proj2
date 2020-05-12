@@ -54,7 +54,9 @@ int main(int argc, char *argv[]){
     
     mkfifo(args.fifoname, 0660);
     
-    sem_init(&s, NOT_SHARED, args.nthreads);
+    if (sem_init(&s, NOT_SHARED, args.nthreads) != EXIT_SUCCESS) {
+        // error
+    }
 
     message_t m;
     while(!timeup_server && sem_wait(&s)){
@@ -72,6 +74,11 @@ int main(int argc, char *argv[]){
 
             sem_post(&s);
         }
+
+        if (sem_close(&s) != EXIT_SUCCESS) {
+            // error
+        }
+
         // Close public fifo
         close(fifo_des);
     }
