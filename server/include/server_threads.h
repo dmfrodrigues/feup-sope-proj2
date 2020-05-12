@@ -20,6 +20,13 @@ int server_threads_init(void);
 int server_threads_clean(void);
 
 /**
+ * @brief Attempts to enter bathroom, creating a new server thread in the process.
+ * 
+ * @param m_ Pointer to message to be processed
+ */
+void try_entering(message_t *m_);
+
+/**
  * @brief Create new thread to process a message.
  * 
  * Makes a copy of m, so you can free m afterwards.

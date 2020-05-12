@@ -20,6 +20,14 @@ atomic_lli_t *num_threads = NULL;
 
 atomic_lli_t* num_processed_requests = NULL;
 
+
+bool spots[3] = {false};
+
+bool atLeastOneSpotOpen = true;
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; 
+
+
 int server_threads_init(void){
     num_threads = atomic_lli_ctor();
     num_processed_requests = atomic_lli_ctor();
@@ -58,7 +66,7 @@ void* server_thread_func(void *arg){
             confirm.pid = getpid();
             confirm.tid = pthread_self();
             confirm.dur = m->dur;
-            confirm.pl = atomic_lli_postinc(num_processed_requests);
+            //confirm.pl = atomic_lli_postinc(num_processed_requests);
         }
         // Confirm usage of bathroom
         if(output(&confirm, op_ENTER)) { *ret = EXIT_FAILURE; return ret; }
@@ -67,6 +75,11 @@ void* server_thread_func(void *arg){
         // Actually use bathroom
         if(common_wait(m->dur));
         // Finished using the bathroom
+        pthread_mutex_lock(&mutex);
+        spots[m->pl] = false;
+        atLeastOneSpotOpen = true;
+        pthread_cond_broadcast(&cond);
+        pthread_mutex_unlock(&mutex);
         if(output(&confirm, op_TIMUP)) { *ret = EXIT_FAILURE; return ret; }
     }
     //Routine stuff
@@ -75,15 +88,39 @@ void* server_thread_func(void *arg){
     return ret;
 }
 
+void try_entering(message_t *m_){
+    pthread_mutex_lock(&mutex);
+    while (!atLeastOneSpotOpen)
+    {
+        pthread_cond_wait(&cond, &mutex); 
+    }
+
+    for (int i = 0 ; i < 3 ; i++){
+        if (!spots[i]){
+            m_->pl = i;
+            spots[i] = true;
+            pthread_mutex_unlock(&mutex);
+            pthread_t tid_dummy;
+            pthread_create(&tid_dummy, NULL, server_thread_func, m_);
+            return;
+        }
+    }
+
+    printf("Shits full, waiting\n");
+
+    atLeastOneSpotOpen = false;
+    pthread_mutex_unlock(&mutex);
+    try_entering(m_);
+}
+
 int server_create_thread(const message_t *m){
     atomic_lli_postinc(num_threads);
 
     message_t *m_ = malloc(sizeof(message_t));
     *m_ = *m;
 
-    pthread_t tid_dummy;
-    pthread_create(&tid_dummy, NULL, server_thread_func, m_);
-
+    try_entering(m_);
+    
     return EXIT_SUCCESS;
 }
 
