@@ -17,26 +17,11 @@
 client_args_t c_args;
 atomic_lli_t *timeup_client = NULL;
 
-int client_init(int argc, char *argv[]){
+int main(int argc, char *argv[]){
+    // Initialize
     timeup_client = atomic_lli_ctor();
     if(client_args_ctor(&c_args, argc, argv)) return EXIT_FAILURE;
     if(client_threads_init()) return EXIT_FAILURE;
-    return EXIT_SUCCESS;
-}
-
-void client_clean(void){
-    atomic_lli_dtor(timeup_client);
-    client_args_dtor(&c_args);
-    if(client_threads_clear()){
-        const char *buf = "Could not clear client threads\n";
-        write(STDERR_FILENO, buf, strlen(buf));
-    }
-}
-
-int main(int argc, char *argv[]){
-    // Initialize
-    if(client_init(argc, argv)) return EXIT_FAILURE;
-    if(atexit(client_clean)) return EXIT_FAILURE;
     // Time
     const double run_ms = MILLISECOND_MULT * c_args.nsecs;      // Time to run program
     if(common_starttime(NULL)) return EXIT_FAILURE;             // Start timer
@@ -59,6 +44,10 @@ int main(int argc, char *argv[]){
     }
 
     client_wait_all_threads();
+    // Cleanup
+    atomic_lli_dtor(timeup_client);
+    client_args_dtor(&c_args);
+    if(client_threads_clear()) return EXIT_FAILURE;
 
     return EXIT_SUCCESS;
 }
