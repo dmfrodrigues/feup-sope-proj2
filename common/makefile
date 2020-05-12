@@ -23,7 +23,7 @@ CFLAGS=$(CFLAGS_PARANOID)
 
 O_FILES=$(ODIR)/output.o $(ODIR)/common_time.o $(ODIR)/utils.o $(ODIR)/common_atomic.o
 
-all: makefolders $(LIB)
+all: $(LIB)
 
 clean:
 	rm -f  $(TAPP)
@@ -41,13 +41,15 @@ test: ./$(TAPP)
 testmem: ./$(TAPP)
 	valgrind --leak-check=yes $(TAPP)
 
-makefolders:
-	mkdir -p $(ODIR)
-	mkdir -p $(LDIR)
-
-$(LIB):   $(O_FILES)
+$(LIB):   $(O_FILES) | $(LDIR)
 	rm -f $(LIB)
 	ar rvs $(LIB) $(O_FILES)
 
-$(ODIR)/%.o:          $(SDIR)/%.c
+$(ODIR)/%.o: $(SDIR)/%.c | $(ODIR)
 	$(CC) $(CFLAGS) $(IFLAGS) -c $^ -o $@
+
+$(ODIR):
+	mkdir -p $@
+
+$(LDIR):
+	mkdir -p $@

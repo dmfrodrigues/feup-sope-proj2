@@ -47,5 +47,5 @@ $(APP):   $(O_MAIN_FILE) $(O_FILES)
 $(ODIR):
 	mkdir -p $(ODIR)
 
-$(ODIR)/%.o: $(SDIR)/%.c $(ODIR)
+$(ODIR)/%.o: $(SDIR)/%.c | $(ODIR)
 	$(CC) $(CFLAGS) $(IFLAGS) -c $< -o $@
