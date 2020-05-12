@@ -19,9 +19,9 @@
 #define MAX_THREADS 1000000
 
 server_args_t args;
-volatile sig_atomic_t timeup_server = false;
 
 int init(int argc, char* argv[]){
+    timeup_server = false;
     if(server_args_ctor(&args, argc, argv, 1000000)) return EXIT_FAILURE;
     if(server_install_handlers()) return EXIT_FAILURE;
     if(server_threads_init()) return EXIT_FAILURE;
