@@ -15,8 +15,8 @@ IFLAGS =-I$(IDIR)
 LFLAGS =-lpthread -lrt -L$(COMMON) -lcommon
 CFLAGS_PARANOID =-Wall -Wextra -Wformat-nonliteral -Wcast-align -Wpointer-arith -Wbad-function-cast \
 -Wstrict-prototypes -Winline -Wundef \
--Wnested-externs -Wcast-qual -Wshadow -Wwrite-strings -Wno-unused-parameter \
--Wfloat-equal -pedantic -Wno-long-long -Wno-endif-labels -g 
+-Wnested-externs -Wcast-qual -Wshadow -Wwrite-strings -Wunused-parameter \
+-Wfloat-equal -pedantic -Wno-long-long -Wno-endif-labels -Wunused-result -g 
 
 # CFLAGS =-Wall -g #-O3
 CFLAGS=$(CFLAGS_PARANOID)

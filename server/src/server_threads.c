@@ -60,14 +60,10 @@ void* server_thread_func(void *arg){
             confirm.dur = m->dur;
             confirm.pl = atomic_lli_postinc(num_processed_requests);
         }
-        // Confirm usage of bathroom
-        if(output(&confirm, op_ENTER)) { *ret = EXIT_FAILURE; return ret; }
-        // Open, write and close private fifo
-        if(server_thread_answer(m, &confirm)) { *ret = EXIT_FAILURE; return ret; }
-        // Actually use bathroom
-        if(common_wait(m->dur));
-        // Finished using the bathroom
-        if(output(&confirm, op_TIMUP)) { *ret = EXIT_FAILURE; return ret; }
+        if(output(&confirm, op_ENTER))          { *ret = EXIT_FAILURE; return ret; }        // Confirm usage of bathroom
+        if(server_thread_answer(m, &confirm))   { *ret = EXIT_FAILURE; return ret; }        // Open, write and close private fifo
+        if(common_wait(m->dur))                 { *ret = EXIT_FAILURE; return ret; }        // Actually use bathroom
+        if(output(&confirm, op_TIMUP))          { *ret = EXIT_FAILURE; return ret; }        // Finished using the bathroom
     }
     //Routine stuff
     free(arg);

@@ -99,9 +99,9 @@ void *client_execute_thread(void *arg) {
     message_t ans;
     if(read(privfifo_fd, &ans, sizeof(message_t)) != sizeof(message_t)){ *ret = EXIT_FAILURE; return ret; }
     if(ans.pl != -1) {
-        if(output(&ans, op_IAMIN));
+        if(output(&ans, op_IAMIN)){ *ret = EXIT_FAILURE; return ret; };
     } else {
-        if(output(&ans, op_CLOSD));
+        if(output(&ans, op_CLOSD)){ *ret = EXIT_FAILURE; return ret; };
         atomic_lli_set(timeup_client, 1);
     }
     // Close private fifo
