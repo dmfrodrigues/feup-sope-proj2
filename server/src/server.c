@@ -71,13 +71,13 @@ int main(int argc, char *argv[]){
             if(server_create_thread(&m)){ ret = EXIT_FAILURE; break; }
         }
 
-        // Destroy Semaphore
-        if (sem_destroy(&s) != EXIT_SUCCESS) return EXIT_FAILURE;
-
         // Close public fifo
         close(fifo_des);
     }
-    
+
+    // Destroy Semaphore
+    if (sem_destroy(&s) != EXIT_SUCCESS) return EXIT_FAILURE;
+
     if (server_close_service(args.fifoname)) ret = EXIT_FAILURE;
 
     return ret;
