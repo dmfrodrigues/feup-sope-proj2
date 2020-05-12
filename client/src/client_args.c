@@ -19,7 +19,6 @@ static const char FIFO_PREFIX[] = "/tmp/";
 int client_args_ctor(client_args_t *p, int argc, char *argv[]){
     // Initial work
     if(p == NULL || argv == NULL){ errno = EINVAL; return EXIT_FAILURE; }                   // Invalid arguments
-    char buf[1024];                                                                         // Create buffer
     *p = CLIENT_ARGS_DEFAULT;                                                               // Set return value to default
     // Cycle through arguments
     optind = 1;
