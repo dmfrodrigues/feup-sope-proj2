@@ -38,82 +38,65 @@ int client_send_request(char *pathname, message_t to_send) {
     return EXIT_SUCCESS;
 }
 
-static atomic_lli_t *num_threads = NULL;
-
+static atomic_lli_t *num_threads = NULL;                // Number of active threads
 int client_threads_init(void){
-    num_threads = atomic_lli_ctor();
-
+    num_threads = atomic_lli_ctor();                    // Initialize num_threads
     return EXIT_SUCCESS;
 }
-
 int client_threads_clear(void){
-    atomic_lli_dtor(num_threads); num_threads = NULL;
-
+    atomic_lli_dtor(num_threads); num_threads = NULL;   // Destruct num_threads
     return EXIT_SUCCESS;
 }
 
 void *client_execute_thread(void *arg) {
-    atomic_lli_postinc(num_threads);
+    atomic_lli_postinc(num_threads);                                    // Increment num_threads (as we are entering a new thread)
 
-    int *ret = malloc(sizeof(int)); *ret = EXIT_SUCCESS;
-    client_thread_args_t *args = (client_thread_args_t *)arg;
-    // Create message 
+    int *ret = malloc(sizeof(int)); *ret = EXIT_SUCCESS;                // Allocate for ret
+    client_thread_args_t *args = (client_thread_args_t *)arg;           // Convert to proper argument type
+    // Create message
     message_t m;
     m.i   = args->i;
     m.pid = getpid();
     m.tid = pthread_self();
     m.dur = args->dur;
     m.pl  = REQUEST_PL_FIELD;
-    // Create private fifo
-    char privfifo_path[PATH_MAX];
-    sprintf(privfifo_path, "/tmp/%d.%lu", getpid(), pthread_self());
-    mkfifo(privfifo_path, 0660);
     // Send request via fifoname
     int req;
     if ((req = client_send_request(args->public_fifoname, m)) != EXIT_SUCCESS){ 
         if (req == 2){
             m.dur = -1;
             m.pl = -1;
-            output(&m, op_FAILD);
-
-            // Delete fifo
-            unlink(privfifo_path);
-            // Free arguments
-            if(client_thread_args_dtor(args)){ *ret = EXIT_FAILURE; return ret; }
-            free(args);
-            // Return
-            atomic_lli_postdec(num_threads);
+            if(output(&m, op_FAILD))            {*ret = EXIT_FAILURE; return ret; }             // Output FAILD message
+            if(client_thread_args_dtor(args))   {*ret = EXIT_FAILURE; return ret; } free(args); // Free arguments
+            atomic_lli_postdec(num_threads);                                                    // Decrement number of threads
             *ret = EXIT_SUCCESS; return ret; 
         }
         *ret = EXIT_FAILURE; return ret;
     }
-
+    // Create private fifo
+    char private_fifo_path[PATH_MAX];
+    sprintf(private_fifo_path, "/tmp/%d.%lu", getpid(), pthread_self());
+    mkfifo(private_fifo_path, 0660);
     // Open private fifo
-    int privfifo_fd = open(privfifo_path, O_RDONLY);
-    if (privfifo_fd == -1){ *ret = EXIT_FAILURE; return ret; }
+    int private_fifo_filedes = open(private_fifo_path, O_RDONLY); 
+    if (private_fifo_filedes == -1){ *ret = EXIT_FAILURE; return ret; }
     // Receive answer
     message_t ans;
-    if(read(privfifo_fd, &ans, sizeof(message_t)) != sizeof(message_t)){ *ret = EXIT_FAILURE; return ret; }
+    if(read(private_fifo_filedes, &ans, sizeof(message_t)) != sizeof(message_t)){ *ret = EXIT_FAILURE; return ret; }
     if(ans.pl != -1) {
-        if(output(&ans, op_IAMIN)){ *ret = EXIT_FAILURE; return ret; };
+        if(output(&ans, op_IAMIN)){ *ret = EXIT_FAILURE; return ret; }
     } else {
-        if(output(&ans, op_CLOSD)){ *ret = EXIT_FAILURE; return ret; };
+        if(output(&ans, op_CLOSD)){ *ret = EXIT_FAILURE; return ret; }
         atomic_lli_set(timeup_client, 1);
     }
-    // Close private fifo
-    close(privfifo_fd);
-
-    // Delete fifo
-    unlink(privfifo_path);
-    // Free arguments
-    if(client_thread_args_dtor(args)){ *ret = EXIT_FAILURE; return ret; }
-    free(args);
-    // Return
-    atomic_lli_postdec(num_threads);
+    if(close(private_fifo_filedes))     { *ret = EXIT_FAILURE; return ret; }                // Close private fifo
+    if(unlink(private_fifo_path))       { *ret = EXIT_FAILURE; return ret; }                // Delete fifo
+    if(client_thread_args_dtor(args))   { *ret = EXIT_FAILURE; return ret; } free(args);    // Free arguments
+    atomic_lli_postdec(num_threads);                                                        // Decrement num_threads (as we are about to exit this thread)
     return ret;
 }
 
-#define SLEEP_MICROSECONDS 100000
+#define SLEEP_MICROSECONDS 10000
 
 int client_wait_all_threads(void){
     while(true){
