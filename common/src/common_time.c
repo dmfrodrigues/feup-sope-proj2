@@ -3,7 +3,10 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#include <time.h>
 #include <sys/time.h>
+
+#define MILLIS_TO_NANOS     1000000 // from ms to ns
 
 static micro_t microseconds_since_epoch = -1;
 
@@ -38,10 +41,9 @@ int common_gettime(double *d){
 }
 
 int common_wait(double d){
-    double start; if(common_gettime(&start)) return EXIT_FAILURE;
-    double end; if(common_gettime(&end)) return EXIT_FAILURE;
-    while(end - start < d){
-        if(common_gettime(&end)) return EXIT_FAILURE;
-    }
-    return EXIT_SUCCESS;
+    struct timespec request = {
+        .tv_sec = 0,
+        .tv_nsec = MILLIS_TO_NANOS * d
+    };
+    return clock_nanosleep(CLOCK_REALTIME, 0, &request, NULL);
 }
