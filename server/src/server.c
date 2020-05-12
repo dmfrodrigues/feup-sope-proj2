@@ -54,12 +54,10 @@ int main(int argc, char *argv[]){
     
     mkfifo(args.fifoname, 0660);
     
-    if (sem_init(&s, NOT_SHARED, args.nthreads) != EXIT_SUCCESS) {
-        // error
-    }
+    if (sem_init(&s, NOT_SHARED, args.nthreads) != EXIT_SUCCESS) return EXIT_FAILURE;
 
     message_t m;
-    while(!timeup_server && sem_wait(&s)){
+    while(!timeup_server){   // sem_wait returns 0 when success (!0 -> "1"); sem_wait waits while value of the semaphore is 0
         // Open public fifo
         int fifo_des = open(args.fifoname, O_RDONLY);
         if(fifo_des == -1){
@@ -71,13 +69,10 @@ int main(int argc, char *argv[]){
         while((r = read(fifo_des, &m, sizeof(message_t))) == sizeof(message_t)){
             if(output(&m, op_RECVD)){ ret = EXIT_FAILURE; break; }
             if(server_create_thread(&m)){ ret = EXIT_FAILURE; break; }
-
-            sem_post(&s);
         }
 
-        if (sem_close(&s) != EXIT_SUCCESS) {
-            // error
-        }
+        // Destroy Semaphore
+        if (sem_destroy(&s) != EXIT_SUCCESS) return EXIT_FAILURE;
 
         // Close public fifo
         close(fifo_des);

@@ -72,11 +72,14 @@ void* server_thread_func(void *arg){
     //Routine stuff
     free(arg);
     atomic_lli_postdec(num_threads);
+    sem_post(&s);
     return ret;
 }
 
 int server_create_thread(const message_t *m){
     atomic_lli_postinc(num_threads);
+
+    sem_wait(&s);
 
     message_t *m_ = malloc(sizeof(message_t));
     *m_ = *m;
