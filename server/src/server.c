@@ -60,7 +60,7 @@ int main(int argc, char *argv[]){
     message_t m;
     while(!timeup_server){ 
 
-        sem_wait(&s);
+        // sem_wait(&s);
 
         // Open public fifo
         int fifo_des = open(args.fifoname, O_RDONLY);
@@ -72,6 +72,7 @@ int main(int argc, char *argv[]){
         // Read messages
         int r;
         while((r = read(fifo_des, &m, sizeof(message_t))) == sizeof(message_t)){
+            sem_wait(&s);
             if(output(&m, op_RECVD)){ ret = EXIT_FAILURE; break; }
             if(server_create_thread(&m)){ ret = EXIT_FAILURE; break; }
         }
