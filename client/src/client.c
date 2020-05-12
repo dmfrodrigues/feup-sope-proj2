@@ -14,7 +14,6 @@
 #define SECONDS_TO_MILLIS   1000    // from sec to ms
 
 client_args_t args;                                                         // Arguments structure
-atomic_lli_t *timeup_client = NULL;                                         // Is 1 if operation time is over, 0 otherwise
 
 int main(int argc, char *argv[]){
     // Initialize
