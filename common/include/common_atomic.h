@@ -20,7 +20,7 @@ atomic_lli_t* atomic_lli_ctor(void);
  * 
  * @param p atomic_lli to be deleted
  */
-void atomic_lli_dtor(atomic_lli_t *p);
+int atomic_lli_dtor(atomic_lli_t *p);
 /**
  * @brief Set value of atomic_lli.
  * 

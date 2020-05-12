@@ -9,13 +9,16 @@ struct atomic_lli {
 };
 atomic_lli_t* atomic_lli_ctor(void){
     atomic_lli_t *res = malloc(sizeof(atomic_lli_t));
+    if(res == NULL) return NULL;
     res->n = 0;
-    pthread_mutex_init(&res->mutex, NULL);
+    if(pthread_mutex_init(&res->mutex, NULL)){ free(res); res = NULL; }
     return res;
 }
-void atomic_lli_dtor(atomic_lli_t *p){
-    pthread_mutex_destroy(&p->mutex);
+int atomic_lli_dtor(atomic_lli_t *p){
+    if(p == NULL) return EXIT_SUCCESS;
+    if(pthread_mutex_destroy(&p->mutex)) return EXIT_FAILURE;
     free(p);
+    return EXIT_SUCCESS;
 }
 void atomic_lli_set(atomic_lli_t *p, long long int n){
     pthread_mutex_lock(&p->mutex);
