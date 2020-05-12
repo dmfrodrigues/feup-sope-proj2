@@ -78,8 +78,8 @@ void* server_thread_func(void *arg){
 
 int server_create_thread(const message_t *m){
     atomic_lli_postinc(num_threads);
-
-    sem_wait(&s);
+    
+    // sem_wait(&s);
 
     message_t *m_ = malloc(sizeof(message_t));
     *m_ = *m;
