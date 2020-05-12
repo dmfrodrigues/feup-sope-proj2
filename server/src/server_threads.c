@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <limits.h>
+#include <linux/limits.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
