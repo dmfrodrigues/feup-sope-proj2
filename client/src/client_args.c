@@ -7,46 +7,36 @@
 #include <getopt.h>
 #include <errno.h>
 
-static const client_args_t client_args_default = 
-{ 
-.nsecs = -1,
-.fifoname = NULL
+static const client_args_t CLIENT_ARGS_DEFAULT = { 
+    .nsecs = -1,
+    .fifoname = NULL
 };
 
-static const char optstring[] = "t:";
+static const char OPTSTRING[] = "t:";
 
-static const char fifo_prefix[] = "/tmp/";
+static const char FIFO_PREFIX[] = "/tmp/";
 
 int client_args_ctor(client_args_t *p, int argc, char *argv[]){
-    *p = client_args_default;
-    char buf[1024];
-
-    if(p == NULL || argv == NULL){ errno = EINVAL; return EXIT_FAILURE; }
-
-    opterr = 0;
+    // Initial work
+    if(p == NULL || argv == NULL){ errno = EINVAL; return EXIT_FAILURE; }                   // Invalid arguments
+    char buf[1024];                                                                         // Create buffer
+    *p = CLIENT_ARGS_DEFAULT;                                                               // Set return value to default
+    // Cycle through arguments
     optind = 1;
-    int opt = 0;
-    while((opt = getopt(argc, argv, optstring)) != -1){
+    int opt;
+    while((opt = getopt(argc, argv, OPTSTRING)) != -1){                                     // While there are options to process
         switch(opt){
-            case 't': if(sscanf(optarg, "%d", &p->nsecs) != 1) return EXIT_FAILURE; break;
-            case '?':
-                sprintf(buf, "client: invalid option -- '%c'\n", optopt);
-                write(STDERR_FILENO, buf, strlen(buf));
-                return EXIT_FAILURE;
-            default:
-                opterr = 1; optind = 1; return EXIT_FAILURE;
+            case 't': if(sscanf(optarg, "%d", &p->nsecs) != 1)  return EXIT_FAILURE; break; // Time
+            case '?':                                           return EXIT_FAILURE;        // Unknown characters
+            default: optind = 1;                                return EXIT_FAILURE;        // Other errors
         }
     }
-    opterr = 1;
 
-    if (p->nsecs == client_args_default.nsecs ||
-        argc - optind != 1){
-        errno = EINVAL;
-        return EXIT_FAILURE;
-    }
-
-    p->fifoname = calloc(strlen(argv[optind])+strlen(fifo_prefix)+1, sizeof(char));
-    strcat(strcpy(p->fifoname, fifo_prefix), argv[optind]);
+    if (p->nsecs == CLIENT_ARGS_DEFAULT.nsecs ||                                            // If time was not set, or
+        argc - optind != 1) return EXIT_FAILURE;                                            // if there are more than one arguments that are not options
+    // Get fifoname
+    p->fifoname = calloc(strlen(argv[optind])+strlen(FIFO_PREFIX)+1, sizeof(char));
+    strcat(strcpy(p->fifoname, FIFO_PREFIX), argv[optind]);
 
     return EXIT_SUCCESS;
 }
