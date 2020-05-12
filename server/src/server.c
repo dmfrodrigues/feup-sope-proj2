@@ -24,7 +24,6 @@ volatile sig_atomic_t timeup_server = false;
 int init(int argc, char* argv[]){
     if(server_args_ctor(&args, argc, argv, 1000000)) return EXIT_FAILURE;
     if(server_install_handlers()) return EXIT_FAILURE;
-    if(common_starttime(NULL)) return EXIT_FAILURE;
     if(server_threads_init()) return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
