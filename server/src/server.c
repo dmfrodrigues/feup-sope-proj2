@@ -13,13 +13,17 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <semaphore.h>
 
 #include "common_time.h"
 
 #define MAX_THREADS 1000000
+#define NOT_SHARED  0 // sem. is not shared w/other processes 
 
 server_args_t args;
 volatile sig_atomic_t timeup_server = false;
+
+sem_t s;
 
 int init(int argc, char* argv[]){
     if(server_args_ctor(&args, argc, argv, 1000000)) return EXIT_FAILURE;
@@ -50,9 +54,10 @@ int main(int argc, char *argv[]){
     
     mkfifo(args.fifoname, 0660);
     
-    
+    sem_init(&s, NOT_SHARED, args.nthreads);
+
     message_t m;
-    while(!timeup_server){
+    while(!timeup_server && sem_wait(&s)){
         // Open public fifo
         int fifo_des = open(args.fifoname, O_RDONLY);
         if(fifo_des == -1){
@@ -64,6 +69,8 @@ int main(int argc, char *argv[]){
         while((r = read(fifo_des, &m, sizeof(message_t))) == sizeof(message_t)){
             if(output(&m, op_RECVD)){ ret = EXIT_FAILURE; break; }
             if(server_create_thread(&m)){ ret = EXIT_FAILURE; break; }
+
+            sem_post(&s);
         }
         // Close public fifo
         close(fifo_des);
