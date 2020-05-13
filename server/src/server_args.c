@@ -19,11 +19,12 @@ static const char OPTSTRING[] = "t:l:n:";
 
 static const char FIFO_PREFIX[] = "/tmp/";
 
-int server_args_ctor(server_args_t *p, int argc, char *argv[], int max_threads){
+int server_args_ctor(server_args_t *p, int argc, char *argv[], int max_threads, int max_places){
     // Initial work
     if(p == NULL || argv == NULL){ errno = EINVAL; return EXIT_FAILURE; }                       // Invalid arguments
     *p = SERVER_ARGS_DEFAULT;                                                                   // Set return value to default
     p->nthreads = max_threads;                                                                  // Set max number of threads
+    p->nplaces = max_places;
     // Cycle through arguments
     optind = 1;
     int opt;

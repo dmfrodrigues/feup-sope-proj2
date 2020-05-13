@@ -3,6 +3,7 @@
 #include "common_time.h"
 #include "common_atomic.h"
 #include "output.h"
+#include "server_signal.h"
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -13,24 +14,34 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <errno.h>
+#include <semaphore.h>
 
 #define SLEEP_MICROSECONDS 100000
 
-atomic_lli_t *num_threads = NULL;
+#define NOT_SHARED  0
 
 atomic_lli_t* num_processed_requests = NULL;
 
-int server_threads_init(void){
-    num_threads = atomic_lli_ctor();
-    num_processed_requests = atomic_lli_ctor();
+int places;
+int max_threads;
+bool *spots;
+bool atLeastOneSpotOpen = true;
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; 
 
+
+int server_threads_init(int nplaces, int nthreads){
+    num_processed_requests = atomic_lli_ctor();
+    spots = calloc(nplaces, sizeof(bool));
+    places = nplaces;
+    max_threads = nthreads;
+    if(sem_init(&s, NOT_SHARED, max_threads) != EXIT_SUCCESS) return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
 
 int server_threads_clean(void){
-    atomic_lli_dtor(num_threads); num_threads = NULL;
     atomic_lli_dtor(num_processed_requests); num_processed_requests = NULL;
-
+    free(spots);
     return EXIT_SUCCESS;
 }
 
@@ -58,36 +69,87 @@ void* server_thread_func(void *arg){
             confirm.pid = getpid();
             confirm.tid = pthread_self();
             confirm.dur = m->dur;
-            confirm.pl = atomic_lli_postinc(num_processed_requests);
+            confirm.pl = m->pl;
         }
         if(output(&confirm, op_ENTER))          { *ret = EXIT_FAILURE; return ret; }        // Confirm usage of bathroom
         if(server_thread_answer(m, &confirm))   { *ret = EXIT_FAILURE; return ret; }        // Open, write and close private fifo
         if(common_wait(m->dur))                 { *ret = EXIT_FAILURE; return ret; }        // Actually use bathroom
         if(output(&confirm, op_TIMUP))          { *ret = EXIT_FAILURE; return ret; }        // Finished using the bathroom
+        
+        pthread_mutex_lock(&mutex);
+        spots[m->pl] = false;
+        atLeastOneSpotOpen = true;
+        pthread_cond_signal(&cond);
+        pthread_mutex_unlock(&mutex);
+
+        sem_post(&s);
     }
     //Routine stuff
     free(arg);
-    atomic_lli_postdec(num_threads);
     return ret;
 }
 
-int server_create_thread(const message_t *m){
-    atomic_lli_postinc(num_threads);
+int try_entering(message_t *m_){
+    pthread_mutex_lock(&mutex);
+    while (!atLeastOneSpotOpen)
+    {
+        pthread_cond_wait(&cond, &mutex); 
+    }
 
+    if (timeup_server) {
+        output(m_, op_2LATE);
+        message_t confirm; {
+            confirm.i = m_->i;
+            confirm.pid = getpid();
+            confirm.tid = pthread_self();
+            confirm.dur = -1;
+            confirm.pl = -1;
+        }
+        server_thread_answer(m_, &confirm);
+
+        atLeastOneSpotOpen = true;
+        pthread_cond_broadcast(&cond);
+        pthread_mutex_unlock(&mutex);
+
+        sem_post(&s);
+
+        return EXIT_SUCCESS;
+    }
+
+    for (int i = 0 ; i < places ; i++){
+        if (!spots[i]){
+            m_->pl = i;
+            spots[i] = true;
+            pthread_mutex_unlock(&mutex);
+            pthread_t tid_dummy;
+            pthread_create(&tid_dummy, NULL, server_thread_func, m_);
+            return EXIT_SUCCESS;
+        }
+    }
+
+    atLeastOneSpotOpen = false;
+    pthread_mutex_unlock(&mutex);
+    try_entering(m_);
+    return EXIT_FAILURE;
+}
+
+int server_create_thread(const message_t *m){
     message_t *m_ = malloc(sizeof(message_t));
     *m_ = *m;
 
-    pthread_t tid_dummy;
-    pthread_create(&tid_dummy, NULL, server_thread_func, m_);
-
+    try_entering(m_);
+    
     return EXIT_SUCCESS;
 }
 
 int server_wait_all_threads(void){
-    while(true){
-        if(atomic_lli_get(num_threads) <= 0) return EXIT_SUCCESS;
+    int x; 
+    if (sem_getvalue(&s, &x)) return EXIT_FAILURE;
+    while(x < max_threads){
         if(usleep(SLEEP_MICROSECONDS)) return EXIT_FAILURE;
+        if (sem_getvalue(&s, &x)) return EXIT_FAILURE;
     }
+    return EXIT_SUCCESS;
 }
 
 int server_close_service(char* fifoname){
