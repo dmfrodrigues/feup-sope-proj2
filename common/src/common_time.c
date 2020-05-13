@@ -24,22 +24,22 @@ int common_starttime(micro_t *micros_since_epoch){
     return EXIT_SUCCESS;
 }
 
-int common_gettime(milli_t *d){
-    if(d == NULL){
+int common_gettime(milli_t *t){
+    if(t == NULL){
         errno = EINVAL;
         return EXIT_FAILURE;
     }
     micro_t now;
     if(get_microseconds_since_epoch(&now)) return EXIT_FAILURE;
     now -= microseconds_since_epoch;
-    *d = now*MICROS_TO_MILLIS;
+    *t = now*MICROS_TO_MILLIS;
     return EXIT_SUCCESS;
 }
 
-int common_wait(double d){
+int common_wait(milli_t t){
     struct timespec request = {
         .tv_sec = 0,
-        .tv_nsec = MILLIS_TO_NANOS * d
+        .tv_nsec = MILLIS_TO_NANOS * t
     };
     return clock_nanosleep(CLOCK_REALTIME, 0, &request, NULL);
 }
