@@ -101,8 +101,6 @@ int try_entering(message_t *m_){
         }
         server_thread_answer(m_, &confirm);
 
-        // This should be here just in case 
-
         atLeastOneSpotOpen = true;
         pthread_cond_broadcast(&cond);
         pthread_mutex_unlock(&mutex);
