@@ -24,7 +24,7 @@ atomic_lli_t* num_processed_requests = NULL;
 
 int places;
 int max_threads;
-bool *spots;
+bool *spots = NULL;
 bool atLeastOneSpotOpen = true;
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; 
