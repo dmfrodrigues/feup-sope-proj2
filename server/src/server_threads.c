@@ -96,6 +96,12 @@ void* server_thread_func(void *arg){
     return ret;
 }
 
+/**
+ * @brief Attempts to enter bathroom, creating a new server thread in the process.
+ * 
+ * @param m     Pointer to message to be processed
+ * @return int  EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
+ */
 int try_entering(message_t *m_){
     pthread_mutex_lock(&mutex);
     while (!atLeastOneSpotOpen) {
@@ -158,7 +164,7 @@ int server_wait_all_threads(void){
     return EXIT_SUCCESS;
 }
 
-int server_close_service(char* public_fifo_path){
+int server_close_service(const char *public_fifo_path){
     int ret = EXIT_SUCCESS;
     
     // Open public fifo

@@ -23,14 +23,6 @@ int server_threads_init(int nplaces, int nthreads);
 int server_threads_clean(void);
 
 /**
- * @brief Attempts to enter bathroom, creating a new server thread in the process.
- * 
- * @param m     Pointer to message to be processed
- * @return int  EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
- */
-int try_entering(message_t *m_);
-
-/**
  * @brief Create new thread to process a message.
  * 
  * Makes a copy of m, so you can free m afterwards.
@@ -53,6 +45,6 @@ int server_wait_all_threads(void);
  * @param public_fifo_path public FIFO
  * @return int EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int server_close_service(char* public_fifo_path);
+int server_close_service(const char *public_fifo_path);
 
 #endif //SERVER_THREADS_H_INCLUDED
