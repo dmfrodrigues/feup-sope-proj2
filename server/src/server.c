@@ -31,8 +31,6 @@ int main(int argc, char *argv[]){
     if(common_starttime(NULL)) return EXIT_FAILURE;
     if(alarm(args.nsecs))                               return EXIT_FAILURE;        // Register alarm
     if(mkfifo(args.fifoname, 0660))                     return EXIT_FAILURE;        // Create public FIFO
-    // if (sem_init(&s, NOT_SHARED, args.nthreads) != EXIT_SUCCESS) return EXIT_FAILURE;
-
     // Read requests
     message_t message;
     while(!timeup_server){
