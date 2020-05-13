@@ -2,6 +2,9 @@
 #define SERVER_THREADS_H_INCLUDED
 
 #include "message.h"
+#include <semaphore.h>
+
+sem_t s;
 
 /**
  * @brief Initialize server threads stuff.

@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <limits.h>
+#include <linux/limits.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -16,8 +16,6 @@
 #include <errno.h>
 
 #define SLEEP_MICROSECONDS 100000
-
-atomic_lli_t *num_threads = NULL;
 
 atomic_lli_t* num_processed_requests = NULL;
 
@@ -29,7 +27,6 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
 int server_threads_init(int nplaces){
-    num_threads = atomic_lli_ctor();
     num_processed_requests = atomic_lli_ctor();
     spots = calloc(nplaces, sizeof(bool));
     places = nplaces;
@@ -37,7 +34,6 @@ int server_threads_init(int nplaces){
 }
 
 int server_threads_clean(void){
-    atomic_lli_dtor(num_threads); num_threads = NULL;
     atomic_lli_dtor(num_processed_requests); num_processed_requests = NULL;
     free(spots);
     return EXIT_SUCCESS;
@@ -69,23 +65,20 @@ void* server_thread_func(void *arg){
             confirm.dur = m->dur;
             confirm.pl = m->pl;
         }
-        // Confirm usage of bathroom
-        if(output(&confirm, op_ENTER)) { *ret = EXIT_FAILURE; return ret; }
-        // Open, write and close private fifo
-        if(server_thread_answer(m, &confirm)) { *ret = EXIT_FAILURE; return ret; }
-        // Actually use bathroom
-        if(common_wait(m->dur));
-        // Finished using the bathroom
+        if(output(&confirm, op_ENTER))          { *ret = EXIT_FAILURE; return ret; }        // Confirm usage of bathroom
+        if(server_thread_answer(m, &confirm))   { *ret = EXIT_FAILURE; return ret; }        // Open, write and close private fifo
+        if(common_wait(m->dur))                 { *ret = EXIT_FAILURE; return ret; }        // Actually use bathroom
+        if(output(&confirm, op_TIMUP))          { *ret = EXIT_FAILURE; return ret; }        // Finished using the bathroom
+        
         pthread_mutex_lock(&mutex);
         spots[m->pl] = false;
         atLeastOneSpotOpen = true;
         pthread_cond_signal(&cond);
         pthread_mutex_unlock(&mutex);
-        if(output(&confirm, op_TIMUP)) { *ret = EXIT_FAILURE; return ret; }
     }
     //Routine stuff
     free(arg);
-    atomic_lli_postdec(num_threads);
+    sem_post(&s);
     return ret;
 }
 
@@ -134,8 +127,6 @@ int try_entering(message_t *m_){
 }
 
 int server_create_thread(const message_t *m){
-    atomic_lli_postinc(num_threads);
-
     message_t *m_ = malloc(sizeof(message_t));
     *m_ = *m;
 
@@ -145,10 +136,10 @@ int server_create_thread(const message_t *m){
 }
 
 int server_wait_all_threads(void){
-    while(true){
-        if(atomic_lli_get(num_threads) <= 0) return EXIT_SUCCESS;
-        if(usleep(SLEEP_MICROSECONDS)) return EXIT_FAILURE;
-    }
+    int x; 
+    if (sem_getvalue(&s, &x)) return EXIT_FAILURE;
+    while(x <= 0) if(usleep(SLEEP_MICROSECONDS)) return EXIT_FAILURE;
+    return EXIT_SUCCESS;
 }
 
 int server_close_service(char* fifoname){
@@ -158,10 +149,10 @@ int server_close_service(char* fifoname){
     int fifo_des = open(fifoname, O_RDONLY | O_NONBLOCK);
     if(fifo_des == -1 && errno != EINTR) ret = EXIT_FAILURE;
      
-    double start, t; common_gettime(&start); common_gettime(&t);
+    milli_t start_time, now_time; common_gettime(&start_time); common_gettime(&now_time);
     // Read one message (??)
     message_t m;
-    while(t-start <= 100.0){
+    while(now_time-start_time <= 100.0){
         int r = read(fifo_des, &m, sizeof(message_t));
         if(r == -1 && errno != EAGAIN){ 
             break;
@@ -179,7 +170,7 @@ int server_close_service(char* fifoname){
             if (server_thread_answer(&m, &confirm)) ret = EXIT_FAILURE;
             break;
         }
-        common_gettime(&t);
+        common_gettime(&now_time);
     }
 
     close(fifo_des);

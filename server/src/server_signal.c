@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 static void sigalarm_handler(int n){
+    (void)n;
     timeup_server = true;
 }
 

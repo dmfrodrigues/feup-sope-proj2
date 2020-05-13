@@ -4,7 +4,6 @@
 #include "common_atomic.h"
 /**
  * @brief Global variable to be set when server informs client of timeup
- * 
  */
 atomic_lli_t *timeup_client;
 
