@@ -57,9 +57,10 @@ int main(int argc, char *argv[]){
 
     if (server_close_service(args.fifoname)) ret = EXIT_FAILURE;
     // Cleanup
-    if(server_args_dtor(&args)) return EXIT_FAILURE;
-    if(server_threads_clean())  return EXIT_FAILURE;
-    if(sem_destroy(&thread_semaphore)) return EXIT_FAILURE;                               // Destroy Semaphore
+    if(server_args_dtor(&args))         return EXIT_FAILURE;
+    if(server_threads_clean())          return EXIT_FAILURE;
+    if(sem_destroy(&thread_semaphore))  return EXIT_FAILURE;
+    if(sem_destroy(&place_semaphore))   return EXIT_FAILURE;
 
     return ret;
 }

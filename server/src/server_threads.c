@@ -25,10 +25,6 @@ atomic_lli_t* num_processed_requests = NULL;
 int number_places;
 int max_threads;
 bool *spots = NULL;
-bool atLeastOneSpotOpen = true;
-pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; 
-
 
 int server_threads_init(int nplaces, int nthreads){
     num_processed_requests = atomic_lli_ctor();
@@ -36,6 +32,7 @@ int server_threads_init(int nplaces, int nthreads){
     number_places = nplaces;
     max_threads = nthreads;
     if(sem_init(&thread_semaphore, SEMAPHORE_SHARED, max_threads) != EXIT_SUCCESS) return EXIT_FAILURE;
+    if (sem_init(&place_semaphore, SEMAPHORE_SHARED, number_places) != EXIT_SUCCESS) return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
 
@@ -69,28 +66,24 @@ void* server_thread_func(void *arg){
 
     message_t *request = (message_t*)arg;
 
-    /* Use bathroom */{
-        /* Make confirmation message */
-        message_t response = {
-            .i = request->i,
-            .pid = getpid(),
-            .tid = pthread_self(),
-            .dur = request->dur,
-            .pl = request->pl
-        };
-        if(output(&response, op_ENTER))             { *ret = EXIT_FAILURE; return ret; }    // Confirm usage of bathroom
-        if(server_thread_answer(request, &response)){ *ret = EXIT_FAILURE; return ret; }    // Open, write and close private fifo
-        if(common_wait(request->dur))               { *ret = EXIT_FAILURE; return ret; }    // Actually use bathroom
-        if(output(&response, op_TIMUP))             { *ret = EXIT_FAILURE; return ret; }    // Finished using the bathroom
-        
-        pthread_mutex_lock(&mutex);
-        spots[request->pl] = false;
-        atLeastOneSpotOpen = true;
-        pthread_cond_signal(&cond);
-        pthread_mutex_unlock(&mutex);
+    /* Make confirmation message */
+    message_t response = {
+        .i = request->i,
+        .pid = getpid(),
+        .tid = pthread_self(),
+        .dur = request->dur,
+        .pl = request->pl
+    };
+    if(output(&response, op_ENTER))             { *ret = EXIT_FAILURE; return ret; }    // Confirm usage of bathroom
+    if(server_thread_answer(request, &response)){ *ret = EXIT_FAILURE; return ret; }    // Open, write and close private fifo
+    if(common_wait(request->dur))               { *ret = EXIT_FAILURE; return ret; }    // Actually use bathroom
+    if(output(&response, op_TIMUP))             { *ret = EXIT_FAILURE; return ret; }    // Finished using the bathroom
+    
+    spots[request->pl] = false;
 
-        sem_post(&thread_semaphore);
-    }
+    sem_post(&thread_semaphore);
+    sem_post(&place_semaphore);
+    
     //Routine stuff
     free(arg);
     return ret;
@@ -103,10 +96,7 @@ void* server_thread_func(void *arg){
  * @return int  EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
 int try_entering(message_t *m_){
-    pthread_mutex_lock(&mutex);
-    while (!atLeastOneSpotOpen) {
-        pthread_cond_wait(&cond, &mutex); 
-    }
+    sem_wait(&place_semaphore);
 
     if (timeup_server) {
         output(m_, op_2LATE);
@@ -119,11 +109,8 @@ int try_entering(message_t *m_){
         };
         server_thread_answer(m_, &response);
 
-        atLeastOneSpotOpen = true;
-        pthread_cond_broadcast(&cond);
-        pthread_mutex_unlock(&mutex);
-
         sem_post(&thread_semaphore);
+        sem_post(&place_semaphore);
 
         return EXIT_SUCCESS;
     }
@@ -132,36 +119,20 @@ int try_entering(message_t *m_){
         if (!spots[i]){
             m_->pl = i;
             spots[i] = true;
-            pthread_mutex_unlock(&mutex);
             pthread_t tid_dummy;
             pthread_create(&tid_dummy, NULL, server_thread_func, m_);
             return EXIT_SUCCESS;
         }
     }
 
-    atLeastOneSpotOpen = false;
-    pthread_mutex_unlock(&mutex);
-    try_entering(m_);
     return EXIT_FAILURE;
 }
 
 int server_create_thread(const message_t *m){
     message_t *m_ = malloc(sizeof(message_t));
     *m_ = *m;
-
-    try_entering(m_);
     
-    return EXIT_SUCCESS;
-}
-
-int server_wait_all_threads(void){
-    int x; 
-    if (sem_getvalue(&thread_semaphore, &x)) return EXIT_FAILURE;
-    while(x < max_threads){
-        if(usleep(SLEEP_MICROSECONDS)) return EXIT_FAILURE;
-        if (sem_getvalue(&thread_semaphore, &x)) return EXIT_FAILURE;
-    }
-    return EXIT_SUCCESS;
+    return try_entering(m_);
 }
 
 int server_close_service(const char *public_fifo_path){
@@ -200,4 +171,14 @@ int server_close_service(const char *public_fifo_path){
     if(server_wait_all_threads())   ret = EXIT_FAILURE;
 
     return ret;
+}
+
+int server_wait_all_threads(void){
+    int x; 
+    if (sem_getvalue(&thread_semaphore, &x)) return EXIT_FAILURE;
+    while(x < max_threads){
+        if(usleep(SLEEP_MICROSECONDS)) return EXIT_FAILURE;
+        if (sem_getvalue(&thread_semaphore, &x)) return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }

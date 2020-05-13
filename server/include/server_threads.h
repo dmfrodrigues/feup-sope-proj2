@@ -5,6 +5,7 @@
 #include <semaphore.h>
 
 sem_t thread_semaphore;
+sem_t place_semaphore;
 
 /**
  * @brief Initialize server threads stuff.
