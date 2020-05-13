@@ -25,27 +25,20 @@ int server_args_ctor(server_args_t *p, int argc, char *argv[], int max_threads, 
     *p = SERVER_ARGS_DEFAULT;                                                                   // Set return value to default
     p->nthreads = max_threads;                                                                  // Set max number of threads
     p->nplaces = max_places;
-    char buf[1024];
-
-    
-
-    opterr = 0;
+    // Cycle through arguments
     optind = 1;
-    int opt = 0;
+    int opt;
     while((opt = getopt(argc, argv, OPTSTRING)) != -1){
         switch(opt){
-            case 't': if(sscanf(optarg, "%d", &p->nsecs   ) != 1) return EXIT_FAILURE; break;
-            case 'l': if(sscanf(optarg, "%d", &p->nplaces ) != 1) return EXIT_FAILURE; break;
-            case 'n': if(sscanf(optarg, "%d", &p->nthreads) != 1) return EXIT_FAILURE; break;
+            case 't': if(sscanf(optarg, "%d", &p->nsecs   ) != 1) return EXIT_FAILURE; break;   // Time
+            case 'l': if(sscanf(optarg, "%d", &p->nplaces ) != 1) return EXIT_FAILURE; break;   // Number of places
+            case 'n': if(sscanf(optarg, "%d", &p->nthreads) != 1) return EXIT_FAILURE; break;   // Number of threads
             case '?':
-                sprintf(buf, "server: invalid option -- '%c'\n", optopt);
-                write(STDERR_FILENO, buf, strlen(buf));
                 return EXIT_FAILURE;
             default:
-                opterr = 1; optind = 1; return EXIT_FAILURE;
+                optind = 1; return EXIT_FAILURE;
         }
     }
-    opterr = 1;
 
     if (p->nsecs    == SERVER_ARGS_DEFAULT.nsecs    ||
         p->nthreads > max_threads ||
