@@ -2,12 +2,13 @@ COMMONDIR		=./common
 
 CLIENTDIR		=./client
 CLIENTOLDAPP	=$(CLIENTDIR)/client
-CLIENTNEWAPP	=./U1
+CLIENTNEWAPP	=./U2
 
 SERVERDIR		=./server
 SERVEROLDAPP	=$(SERVERDIR)/server
-SERVERNEWAPP	=./Q1
+SERVERNEWAPP	=./Q2
 
+# Create client and server binaries
 all: $(CLIENTNEWAPP) $(SERVERNEWAPP)
 
 $(CLIENTNEWAPP): FORCE
@@ -20,6 +21,7 @@ $(SERVERNEWAPP): FORCE
 
 FORCE:
 
+# Clean binary files
 clean: 
 	make -C $(COMMONDIR) clean
 	make -C $(CLIENTDIR) clean
@@ -27,6 +29,7 @@ clean:
 	rm -f $(CLIENTNEWAPP)
 	rm -f $(SERVERNEWAPP)
 
+# Test code
 test: all
 	make -C $(COMMONDIR) test
 	make -C $(CLIENTDIR) test
@@ -34,12 +37,14 @@ test: all
 	chmod u+x **/*.sh
 	test/test.sh
 
+# Test code and find memory leaks
 testmem:
 	make -C $(CLIENTDIR) testmem
 	make -C $(SERVERDIR) testmem
 
 GROUP=T6G05
 
+# Create zip file to submit
 zip: clean
 	rm -rf $(GROUP)
 	rm -f $(GROUP).zip
@@ -50,6 +55,7 @@ zip: clean
 
 DEST=~/Documents
 
+# Test zip file to submit
 testzip: zip
 	rm -rf $(DEST)/$(GROUP)
 	unzip $(GROUP).zip -d $(DEST)
