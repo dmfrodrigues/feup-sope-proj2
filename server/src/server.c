@@ -46,7 +46,7 @@ int main(int argc, char *argv[]){
         // Read messages
         int r;
         while((r = read(public_fifo_filedes, &message, sizeof(message_t))) == sizeof(message_t)){
-            sem_wait(&semaphore);
+            sem_wait(&thread_semaphore);
             if(output(&message, op_RECVD)){ ret = EXIT_FAILURE; break; }
             if(server_create_thread(&message)){ ret = EXIT_FAILURE; break; }
         }
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]){
     // Cleanup
     if(server_args_dtor(&args)) return EXIT_FAILURE;
     if(server_threads_clean())  return EXIT_FAILURE;
-    if (sem_destroy(&semaphore)) return EXIT_FAILURE;                               // Destroy Semaphore
+    if(sem_destroy(&thread_semaphore)) return EXIT_FAILURE;                               // Destroy Semaphore
 
     return ret;
 }

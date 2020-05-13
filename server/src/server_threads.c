@@ -35,7 +35,7 @@ int server_threads_init(int nplaces, int nthreads){
     spots = calloc(nplaces, sizeof(bool));
     number_places = nplaces;
     max_threads = nthreads;
-    if(sem_init(&semaphore, SEMAPHORE_SHARED, max_threads) != EXIT_SUCCESS) return EXIT_FAILURE;
+    if(sem_init(&thread_semaphore, SEMAPHORE_SHARED, max_threads) != EXIT_SUCCESS) return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
 
@@ -89,7 +89,7 @@ void* server_thread_func(void *arg){
         pthread_cond_signal(&cond);
         pthread_mutex_unlock(&mutex);
 
-        sem_post(&semaphore);
+        sem_post(&thread_semaphore);
     }
     //Routine stuff
     free(arg);
@@ -123,7 +123,7 @@ int try_entering(message_t *m_){
         pthread_cond_broadcast(&cond);
         pthread_mutex_unlock(&mutex);
 
-        sem_post(&semaphore);
+        sem_post(&thread_semaphore);
 
         return EXIT_SUCCESS;
     }
@@ -156,10 +156,10 @@ int server_create_thread(const message_t *m){
 
 int server_wait_all_threads(void){
     int x; 
-    if (sem_getvalue(&semaphore, &x)) return EXIT_FAILURE;
+    if (sem_getvalue(&thread_semaphore, &x)) return EXIT_FAILURE;
     while(x < max_threads){
         if(usleep(SLEEP_MICROSECONDS)) return EXIT_FAILURE;
-        if (sem_getvalue(&semaphore, &x)) return EXIT_FAILURE;
+        if (sem_getvalue(&thread_semaphore, &x)) return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
 }
