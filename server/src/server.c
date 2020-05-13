@@ -13,13 +13,11 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <stdbool.h>
-#include <semaphore.h>
 
 #include "common_time.h"
 
 #define MAX_THREADS 1000000
 #define MAX_PLACES 1024
-#define NOT_SHARED  0
 
 server_args_t args;
 volatile sig_atomic_t timeup_server = false;
@@ -28,8 +26,7 @@ int init(int argc, char* argv[]){
     if(server_args_ctor(&args, argc, argv, MAX_THREADS, MAX_PLACES)) return EXIT_FAILURE;
     if(server_install_handlers()) return EXIT_FAILURE;
     if(common_starttime(NULL)) return EXIT_FAILURE;
-    if(server_threads_init(args.nplaces)) return EXIT_FAILURE;
-    if(sem_init(&s, NOT_SHARED, args.nthreads) != EXIT_SUCCESS) return EXIT_FAILURE;
+    if(server_threads_init(args.nplaces, args.nthreads)) return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
 

@@ -13,7 +13,7 @@ sem_t s;
  * 
  * @return int EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int server_threads_init(int nplaces);
+int server_threads_init(int nplaces, int nthreads);
 
 /**
  * @brief Cleanup server threads stuff.

@@ -14,22 +14,28 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <errno.h>
+#include <semaphore.h>
 
 #define SLEEP_MICROSECONDS 100000
+
+#define NOT_SHARED  0
 
 atomic_lli_t* num_processed_requests = NULL;
 
 int places;
+int max_threads;
 bool *spots;
 bool atLeastOneSpotOpen = true;
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; 
 
 
-int server_threads_init(int nplaces){
+int server_threads_init(int nplaces, int nthreads){
     num_processed_requests = atomic_lli_ctor();
     spots = calloc(nplaces, sizeof(bool));
     places = nplaces;
+    max_threads = nthreads;
+    if(sem_init(&s, NOT_SHARED, max_threads) != EXIT_SUCCESS) return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
 
@@ -139,7 +145,10 @@ int server_create_thread(const message_t *m){
 int server_wait_all_threads(void){
     int x; 
     if (sem_getvalue(&s, &x)) return EXIT_FAILURE;
-    while(x <= 0) if(usleep(SLEEP_MICROSECONDS)) return EXIT_FAILURE;
+    while(x < max_threads){
+        if(usleep(SLEEP_MICROSECONDS)) return EXIT_FAILURE;
+        if (sem_getvalue(&s, &x)) return EXIT_FAILURE;
+    }
     return EXIT_SUCCESS;
 }
 
