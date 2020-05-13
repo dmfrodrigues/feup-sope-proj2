@@ -19,7 +19,7 @@
 #define MAX_THREADS 1000000
 #define MAX_PLACES 1024
 
-server_args_t args;
+server_args_t args;                                                                 // Arguments structure
 
 int main(int argc, char *argv[]){
     int ret = EXIT_SUCCESS;
