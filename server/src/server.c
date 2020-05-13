@@ -60,10 +60,6 @@ int main(int argc, char *argv[]){
     if(server_args_dtor(&args)) return EXIT_FAILURE;
     if(server_threads_clean())  return EXIT_FAILURE;
 
-    // Cleanup
-    if(server_args_dtor(&args)) return EXIT_FAILURE;
-    if(server_threads_clean())  return EXIT_FAILURE;
-
     // Destroy Semaphore
     if (sem_destroy(&s) != EXIT_SUCCESS) return EXIT_FAILURE;
 
