@@ -24,7 +24,7 @@ int output(const message_t *m, operation_t op){
     }
 
     char buf[BUF_SIZE];
-    if (sprintf(buf, "%ld ; %d ; %d ; %lu ; %d ; %d ; %s\n", time(NULL), m->i, m->pid, m->tid, m->dur, m->pl, op_str) < 0 ||
+    if (sprintf(buf, "%ld ; %d ; %d ; %lu ; %d ; %d ; %s\n", time(NULL), m->i, getpid(), pthread_self(), m->dur, m->pl, op_str) < 0 ||
         write(STDOUT_FILENO, buf, strlen(buf)) == -1){
         errno = EIO;
         return EXIT_FAILURE;
