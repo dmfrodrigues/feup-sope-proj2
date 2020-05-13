@@ -22,7 +22,7 @@
 
 atomic_lli_t* num_processed_requests = NULL;
 
-int places;
+int number_places;
 int max_threads;
 bool *spots = NULL;
 bool atLeastOneSpotOpen = true;
@@ -33,7 +33,7 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 int server_threads_init(int nplaces, int nthreads){
     num_processed_requests = atomic_lli_ctor();
     spots = calloc(nplaces, sizeof(bool));
-    places = nplaces;
+    number_places = nplaces;
     max_threads = nthreads;
     if(sem_init(&s, NOT_SHARED, max_threads) != EXIT_SUCCESS) return EXIT_FAILURE;
     return EXIT_SUCCESS;
@@ -60,24 +60,24 @@ void* server_thread_func(void *arg){
     int *ret = malloc(sizeof(int));
     *ret = EXIT_SUCCESS;
 
-    message_t *m = (message_t*)arg;
+    message_t *message = (message_t*)arg;
 
     /* Use bathroom */{
         /* Make confirmation message */
         message_t confirm; {
-            confirm.i = m->i;
+            confirm.i = message->i;
             confirm.pid = getpid();
             confirm.tid = pthread_self();
-            confirm.dur = m->dur;
-            confirm.pl = m->pl;
+            confirm.dur = message->dur;
+            confirm.pl = message->pl;
         }
-        if(output(&confirm, op_ENTER))          { *ret = EXIT_FAILURE; return ret; }        // Confirm usage of bathroom
-        if(server_thread_answer(m, &confirm))   { *ret = EXIT_FAILURE; return ret; }        // Open, write and close private fifo
-        if(common_wait(m->dur))                 { *ret = EXIT_FAILURE; return ret; }        // Actually use bathroom
-        if(output(&confirm, op_TIMUP))          { *ret = EXIT_FAILURE; return ret; }        // Finished using the bathroom
+        if(output(&confirm, op_ENTER))              { *ret = EXIT_FAILURE; return ret; }    // Confirm usage of bathroom
+        if(server_thread_answer(message, &confirm)) { *ret = EXIT_FAILURE; return ret; }    // Open, write and close private fifo
+        if(common_wait(message->dur))               { *ret = EXIT_FAILURE; return ret; }    // Actually use bathroom
+        if(output(&confirm, op_TIMUP))              { *ret = EXIT_FAILURE; return ret; }    // Finished using the bathroom
         
         pthread_mutex_lock(&mutex);
-        spots[m->pl] = false;
+        spots[message->pl] = false;
         atLeastOneSpotOpen = true;
         pthread_cond_signal(&cond);
         pthread_mutex_unlock(&mutex);
@@ -116,7 +116,7 @@ int try_entering(message_t *m_){
         return EXIT_SUCCESS;
     }
 
-    for (int i = 0 ; i < places ; i++){
+    for (int i = 0 ; i < number_places ; i++){
         if (!spots[i]){
             m_->pl = i;
             spots[i] = true;
