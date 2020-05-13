@@ -17,15 +17,16 @@
 #include "common_time.h"
 
 #define MAX_THREADS 1000000
+#define MAX_PLACES 1024
 
 server_args_t args;
 volatile sig_atomic_t timeup_server = false;
 
 int init(int argc, char* argv[]){
-    if(server_args_ctor(&args, argc, argv, 1000000)) return EXIT_FAILURE;
+    if(server_args_ctor(&args, argc, argv, MAX_THREADS, MAX_PLACES)) return EXIT_FAILURE;
     if(server_install_handlers()) return EXIT_FAILURE;
     if(common_starttime(NULL)) return EXIT_FAILURE;
-    if(server_threads_init()) return EXIT_FAILURE;
+    if(server_threads_init(args.nplaces)) return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
 

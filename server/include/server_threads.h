@@ -10,7 +10,7 @@
  * 
  * @return int EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int server_threads_init(void);
+int server_threads_init(int nplaces);
 
 /**
  * @brief Cleanup server threads stuff.
@@ -22,9 +22,10 @@ int server_threads_clean(void);
 /**
  * @brief Attempts to enter bathroom, creating a new server thread in the process.
  * 
- * @param m_ Pointer to message to be processed
+ * @param m     Pointer to message to be processed
+ * @return int  EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-void try_entering(message_t *m_);
+int try_entering(message_t *m_);
 
 /**
  * @brief Create new thread to process a message.

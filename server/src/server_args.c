@@ -20,9 +20,10 @@ static const char optstring[] = "t:l:n:";
 
 static const char fifo_prefix[] = "/tmp/";
 
-int server_args_ctor(server_args_t *p, int argc, char *argv[], int max_threads){
+int server_args_ctor(server_args_t *p, int argc, char *argv[], int max_threads, int max_places){
     *p = server_args_default;
     p->nthreads = max_threads;
+    p->nplaces = max_places;
     char buf[1024];
 
     if(p == NULL || argv == NULL){ errno = EINVAL; return EXIT_FAILURE; }

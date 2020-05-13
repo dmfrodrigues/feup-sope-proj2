@@ -3,6 +3,7 @@
 #include "common_time.h"
 #include "common_atomic.h"
 #include "output.h"
+#include "server_signal.h"
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -20,25 +21,25 @@ atomic_lli_t *num_threads = NULL;
 
 atomic_lli_t* num_processed_requests = NULL;
 
-
-bool spots[3] = {false};
-
+int places;
+bool *spots;
 bool atLeastOneSpotOpen = true;
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; 
 
 
-int server_threads_init(void){
+int server_threads_init(int nplaces){
     num_threads = atomic_lli_ctor();
     num_processed_requests = atomic_lli_ctor();
-
+    spots = calloc(nplaces, sizeof(bool));
+    places = nplaces;
     return EXIT_SUCCESS;
 }
 
 int server_threads_clean(void){
     atomic_lli_dtor(num_threads); num_threads = NULL;
     atomic_lli_dtor(num_processed_requests); num_processed_requests = NULL;
-
+    free(places);
     return EXIT_SUCCESS;
 }
 
@@ -88,25 +89,36 @@ void* server_thread_func(void *arg){
     return ret;
 }
 
-void try_entering(message_t *m_){
+int try_entering(message_t *m_){
     pthread_mutex_lock(&mutex);
     while (!atLeastOneSpotOpen)
     {
         pthread_cond_wait(&cond, &mutex); 
     }
 
-    for (int i = 0 ; i < 3 ; i++){
+    if (timeup_server) {
+        output(m_, op_2LATE);
+        message_t confirm; {
+            confirm.i = m_->i;
+            confirm.pid = getpid();
+            confirm.tid = pthread_self();
+            confirm.dur = -1;
+            confirm.pl = -1;
+        }
+        server_thread_answer(m_, &confirm);
+        return EXIT_SUCCESS;
+    }
+
+    for (int i = 0 ; i < places ; i++){
         if (!spots[i]){
             m_->pl = i;
             spots[i] = true;
             pthread_mutex_unlock(&mutex);
             pthread_t tid_dummy;
             pthread_create(&tid_dummy, NULL, server_thread_func, m_);
-            return;
+            return EXIT_SUCCESS;
         }
     }
-
-    printf("Shits full, waiting\n");
 
     atLeastOneSpotOpen = false;
     pthread_mutex_unlock(&mutex);
