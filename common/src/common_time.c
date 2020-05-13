@@ -17,14 +17,10 @@ int get_microseconds_since_epoch(micro_t *t){
 }
 
 int common_gettime(milli_t *t){
-    if(t == NULL){
-        errno = EINVAL;
-        return EXIT_FAILURE;
-    }
-    micro_t now;
-    if(get_microseconds_since_epoch(&now)) return EXIT_FAILURE;
-    //now -= microseconds_since_epoch;
-    *t = now*MICROS_TO_MILLIS;
+    if(t == NULL) return EXIT_FAILURE;
+    micro_t time_now;
+    if(get_microseconds_since_epoch(&time_now)) return EXIT_FAILURE;
+    *t = time_now*MICROS_TO_MILLIS;
     return EXIT_SUCCESS;
 }
 
