@@ -39,7 +39,7 @@ int server_threads_init(int nplaces){
 int server_threads_clean(void){
     atomic_lli_dtor(num_threads); num_threads = NULL;
     atomic_lli_dtor(num_processed_requests); num_processed_requests = NULL;
-    free(places);
+    free(spots);
     return EXIT_SUCCESS;
 }
 
@@ -79,7 +79,7 @@ void* server_thread_func(void *arg){
         pthread_mutex_lock(&mutex);
         spots[m->pl] = false;
         atLeastOneSpotOpen = true;
-        pthread_cond_broadcast(&cond);
+        pthread_cond_signal(&cond);
         pthread_mutex_unlock(&mutex);
         if(output(&confirm, op_TIMUP)) { *ret = EXIT_FAILURE; return ret; }
     }
@@ -106,6 +106,13 @@ int try_entering(message_t *m_){
             confirm.pl = -1;
         }
         server_thread_answer(m_, &confirm);
+
+        // This should be here just in case 
+
+        atLeastOneSpotOpen = true;
+        pthread_cond_broadcast(&cond);
+        pthread_mutex_unlock(&mutex);
+
         return EXIT_SUCCESS;
     }
 
@@ -123,6 +130,7 @@ int try_entering(message_t *m_){
     atLeastOneSpotOpen = false;
     pthread_mutex_unlock(&mutex);
     try_entering(m_);
+    return EXIT_FAILURE;
 }
 
 int server_create_thread(const message_t *m){
