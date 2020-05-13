@@ -5,14 +5,7 @@ typedef long long milli_t;
 typedef long long micro_t;
 
 /**
- * @brief Start time counting.
- * 
- * @return int EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
- */
-int common_starttime(micro_t *micros_since_epoch);
-
-/**
- * @brief Get number of milliseconds since time was started.
+ * @brief Get number of milliseconds since epoch.
  * 
  * @param d     Pointer to milli_t where time will be stored
  * @return int  EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
