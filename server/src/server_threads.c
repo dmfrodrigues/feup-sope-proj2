@@ -16,19 +16,15 @@
 
 #define SLEEP_MICROSECONDS 100000
 
-atomic_lli_t *num_threads = NULL;
-
 atomic_lli_t* num_processed_requests = NULL;
 
 int server_threads_init(void){
-    num_threads = atomic_lli_ctor();
     num_processed_requests = atomic_lli_ctor();
 
     return EXIT_SUCCESS;
 }
 
 int server_threads_clean(void){
-    atomic_lli_dtor(num_threads); num_threads = NULL;
     atomic_lli_dtor(num_processed_requests); num_processed_requests = NULL;
 
     return EXIT_SUCCESS;
@@ -67,14 +63,11 @@ void* server_thread_func(void *arg){
     }
     //Routine stuff
     free(arg);
-    atomic_lli_postdec(num_threads);
     sem_post(&s);
     return ret;
 }
 
-int server_create_thread(const message_t *m){
-    atomic_lli_postinc(num_threads);
-    
+int server_create_thread(const message_t *m){    
     // sem_wait(&s);
 
     message_t *m_ = malloc(sizeof(message_t));
@@ -87,10 +80,10 @@ int server_create_thread(const message_t *m){
 }
 
 int server_wait_all_threads(void){
-    while(true){
-        if(atomic_lli_get(num_threads) <= 0) return EXIT_SUCCESS;
-        if(usleep(SLEEP_MICROSECONDS)) return EXIT_FAILURE;
-    }
+    int x; 
+    if (sem_getvalue(&s, &x)) return EXIT_FAILURE;
+    while(x <= 0) if(usleep(SLEEP_MICROSECONDS)) return EXIT_FAILURE;
+    return EXIT_SUCCESS;
 }
 
 int server_close_service(char* fifoname){

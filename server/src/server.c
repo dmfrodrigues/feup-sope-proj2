@@ -18,12 +18,10 @@
 #include "common_time.h"
 
 #define MAX_THREADS 1000000
-#define NOT_SHARED  0 // sem. is not shared w/other processes 
+#define NOT_SHARED  0
 
 server_args_t args;
 volatile sig_atomic_t timeup_server = false;
-
-// sem_t s;
 
 int init(int argc, char* argv[]){
     if(server_args_ctor(&args, argc, argv, 1000000)) return EXIT_FAILURE;
