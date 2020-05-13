@@ -24,7 +24,7 @@ server_args_t args;
 int main(int argc, char *argv[]){
     int ret = EXIT_SUCCESS;
     // Initialize
-    timeup_server = false;
+    timeup_server = false;                                                          // Initialize timeup_server
     if(server_args_ctor(&args, argc, argv, MAX_THREADS, MAX_PLACES)) return EXIT_FAILURE;        // Construct arguments structure from argc/argv
     if(server_threads_init(args.nplaces, args.nplaces)) return EXIT_FAILURE;        // Initialize threads
     if(server_install_handlers())                       return EXIT_FAILURE;        // Install alarm handler
@@ -35,7 +35,7 @@ int main(int argc, char *argv[]){
 
     // Read requests
     message_t message;
-    while(!timeup_server){ 
+    while(!timeup_server){
 
         // sem_wait(&s);
 
