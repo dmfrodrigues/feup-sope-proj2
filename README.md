@@ -16,51 +16,18 @@
 
 ### Implementation details
 
-### Development
+#### Managing threads
 
-To perform a simple test, run this command:
-```sh
-server -t 10 fifo
-```
-and 1 second after that run
-```sh
-client -t 1 fifo
-```
-and another 1 second after that run
-```sh
-client -t 1 fifo
-```
-
+We used a semaphore to manage the number of active threads, since the number of threads is a common resource over which there will be race conditions.
 
 ## Make commands
-### Compile
 
 ```sh
-make
-```
-
-### Test
-
-```sh
-make test
-```
-
-### Cleanup
-
-```sh
-make clean
-```
-
-### Create ZIP file
-
-```sh
-make zip
-```
-
-### Test ZIP file contents
-
-```sh
-make testzip
+make          # Compile
+make test     # Test
+make clean    # Cleanup
+make zip      # Create zip for delivery
+make testzip  # Create zip, copy to other location, unzip and run tests
 ```
 
 ## User Commands
@@ -73,4 +40,4 @@ Qn <-t nsecs> [-l nplaces] [-n nthreads] FIFONAME
 - `-t nsecs`: (approximate) number of seconds the program will run
 - `-l nplaces`: maximum occupation of the bathroom
 - `-n nthreads`: maximum number of threads handling requests
-- `FIFONAME`: Filesystem path to named FIFO used to request/receive requests.
+- `FIFONAME`: Name of public FIFO used to request/receive requests (created in `/tmp`).
