@@ -75,10 +75,11 @@ void* server_thread_func(void *arg){
         atLeastOneSpotOpen = true;
         pthread_cond_signal(&cond);
         pthread_mutex_unlock(&mutex);
+
+        sem_post(&s);
     }
     //Routine stuff
     free(arg);
-    sem_post(&s);
     return ret;
 }
 
@@ -105,6 +106,8 @@ int try_entering(message_t *m_){
         atLeastOneSpotOpen = true;
         pthread_cond_broadcast(&cond);
         pthread_mutex_unlock(&mutex);
+
+        sem_post(&s);
 
         return EXIT_SUCCESS;
     }
