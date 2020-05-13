@@ -8,7 +8,7 @@
 #include <errno.h>
 #include <limits.h>
 
-static const server_args_t server_args_default = { 
+static const server_args_t SERVER_ARGS_DEFAULT = { 
     .nsecs = -1,
     .nplaces = INT_MAX,
     .nthreads = 1000000000,
@@ -20,12 +20,14 @@ static const char OPTSTRING[] = "t:l:n:";
 static const char FIFO_PREFIX[] = "/tmp/";
 
 int server_args_ctor(server_args_t *p, int argc, char *argv[], int max_threads, int max_places){
-    *p = server_args_default;
-    p->nthreads = max_threads;
+    // Initial work
+    if(p == NULL || argv == NULL){ errno = EINVAL; return EXIT_FAILURE; }                       // Invalid arguments
+    *p = SERVER_ARGS_DEFAULT;                                                                   // Set return value to default
+    p->nthreads = max_threads;                                                                  // Set max number of threads
     p->nplaces = max_places;
     char buf[1024];
 
-    if(p == NULL || argv == NULL){ errno = EINVAL; return EXIT_FAILURE; }
+    
 
     opterr = 0;
     optind = 1;
@@ -45,7 +47,7 @@ int server_args_ctor(server_args_t *p, int argc, char *argv[], int max_threads, 
     }
     opterr = 1;
 
-    if (p->nsecs    == server_args_default.nsecs    ||
+    if (p->nsecs    == SERVER_ARGS_DEFAULT.nsecs    ||
         p->nthreads > max_threads ||
         argc - optind != 1){
         errno = EINVAL;
