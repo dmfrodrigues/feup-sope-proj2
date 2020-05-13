@@ -22,37 +22,18 @@
 server_args_t args;
 volatile sig_atomic_t timeup_server = false;
 
-int init(int argc, char* argv[]){
-    if(server_args_ctor(&args, argc, argv, MAX_THREADS, MAX_PLACES)) return EXIT_FAILURE;
-    if(server_install_handlers()) return EXIT_FAILURE;
-    if(common_starttime(NULL)) return EXIT_FAILURE;
-    if(server_threads_init(args.nplaces, args.nthreads)) return EXIT_FAILURE;
-    return EXIT_SUCCESS;
-}
-
-void cleanup(void){
-    if(server_args_dtor(&args)){
-        const char *buf = "Could not destruct args\n";
-        write(STDERR_FILENO, buf, strlen(buf));
-    }
-    if(server_threads_clean()){
-        const char *buf = "Could not clean server threads\n";
-        write(STDERR_FILENO, buf, strlen(buf));
-    }
-}
-
 int main(int argc, char *argv[]){
     int ret = EXIT_SUCCESS;
-
-    if(atexit(cleanup)) return EXIT_FAILURE;
-    if(init(argc, argv)) return EXIT_FAILURE;
-
+    // Initialize
+    if(server_args_ctor(&args, argc, argv, MAX_THREADS, MAX_PLACES)) return EXIT_FAILURE;        // Construct arguments structure from argc/argv
+    if(server_threads_init(args.nplaces, args.nplaces)) return EXIT_FAILURE;        // Initialize threads
+    if(server_install_handlers())                       return EXIT_FAILURE;        // Install alarm handler
+    if(common_starttime(NULL)) return EXIT_FAILURE;
     if(alarm(args.nsecs)) return EXIT_FAILURE;
-    
     mkfifo(args.fifoname, 0660);
-    
     // if (sem_init(&s, NOT_SHARED, args.nthreads) != EXIT_SUCCESS) return EXIT_FAILURE;
-
+    
+    // Read requests
     message_t m;
     while(!timeup_server){ 
 
@@ -78,6 +59,10 @@ int main(int argc, char *argv[]){
     }
 
     if (server_close_service(args.fifoname)) ret = EXIT_FAILURE;
+
+    // Cleanup
+    if(server_args_dtor(&args)) return EXIT_FAILURE;
+    if(server_threads_clean())  return EXIT_FAILURE;
 
     // Destroy Semaphore
     if (sem_destroy(&s) != EXIT_SUCCESS) return EXIT_FAILURE;
