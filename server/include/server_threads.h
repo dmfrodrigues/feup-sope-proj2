@@ -50,9 +50,9 @@ int server_wait_all_threads(void);
 /**
  * @brief Clears public FIFO "buffer" and closes server
  * 
- * @param fifoname public FIFO
+ * @param public_fifo_path public FIFO
  * @return int EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int server_close_service(char* fifoname);
+int server_close_service(char* public_fifo_path);
 
 #endif //SERVER_THREADS_H_INCLUDED

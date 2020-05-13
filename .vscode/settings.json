@@ -2,6 +2,7 @@
     "files.associations": {
         "stdbool.h": "c",
         "client_args.h": "c",
-        "client_threads.h": "c"
+        "client_threads.h": "c",
+        "system_error": "c"
     }
 }
