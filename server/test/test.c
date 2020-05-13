@@ -5,6 +5,7 @@
 #include <sys/time.h>
 
 #define MAX_THREADS 1000000
+#define MAX_PLACES 1024
 
 char **deconstify_argv(int argc, const char **argv_const) {
     char **argv = calloc(argc, sizeof(char *));
@@ -36,7 +37,7 @@ void test_server_args_ctor(void) {
         char **argv = deconstify_argv(argc, argv_const);
 
         server_args_t args;
-        TEST_CHECK(server_args_ctor(&args, argc, argv, MAX_THREADS) == EXIT_FAILURE);
+        TEST_CHECK(server_args_ctor(&args, argc, argv, MAX_THREADS, MAX_PLACES) == EXIT_FAILURE);
         TEST_CHECK(server_args_dtor(&args) == EXIT_SUCCESS);
 
         free_argv(argc, argv);
@@ -47,7 +48,7 @@ void test_server_args_ctor(void) {
         char **argv = deconstify_argv(argc, argv_const);
 
         server_args_t args;
-        TEST_CHECK(server_args_ctor(&args, argc, argv, MAX_THREADS) == EXIT_FAILURE);
+        TEST_CHECK(server_args_ctor(&args, argc, argv, MAX_THREADS, MAX_PLACES) == EXIT_FAILURE);
         TEST_CHECK(server_args_dtor(&args) == EXIT_SUCCESS);
 
         free_argv(argc, argv);
@@ -58,7 +59,7 @@ void test_server_args_ctor(void) {
         char **argv = deconstify_argv(argc, argv_const);
 
         server_args_t args;
-        TEST_CHECK(server_args_ctor(&args, argc, argv, MAX_THREADS) == EXIT_FAILURE);
+        TEST_CHECK(server_args_ctor(&args, argc, argv, MAX_THREADS, MAX_PLACES) == EXIT_FAILURE);
         TEST_CHECK(server_args_dtor(&args) == EXIT_SUCCESS);
 
         free_argv(argc, argv);
@@ -69,7 +70,7 @@ void test_server_args_ctor(void) {
         char **argv = deconstify_argv(argc, argv_const);
 
         server_args_t args;
-        TEST_CHECK(server_args_ctor(&args, argc, argv, MAX_THREADS) == EXIT_FAILURE);
+        TEST_CHECK(server_args_ctor(&args, argc, argv, MAX_THREADS, MAX_PLACES) == EXIT_FAILURE);
         TEST_CHECK(server_args_dtor(&args) == EXIT_SUCCESS);
 
         free_argv(argc, argv);
@@ -80,7 +81,7 @@ void test_server_args_ctor(void) {
         char **argv = deconstify_argv(argc, argv_const);
 
         server_args_t args;
-        TEST_CHECK(server_args_ctor(&args, argc, argv, MAX_THREADS) == EXIT_FAILURE);
+        TEST_CHECK(server_args_ctor(&args, argc, argv, MAX_THREADS, MAX_PLACES) == EXIT_FAILURE);
         TEST_CHECK(server_args_dtor(&args) == EXIT_SUCCESS);
 
         free_argv(argc, argv);
@@ -92,7 +93,7 @@ void test_server_args_ctor(void) {
         char **argv = deconstify_argv(argc, argv_const);
 
         server_args_t args;
-        TEST_CHECK(server_args_ctor(&args, argc, argv, MAX_THREADS) == EXIT_SUCCESS);
+        TEST_CHECK(server_args_ctor(&args, argc, argv, MAX_THREADS, MAX_PLACES) == EXIT_SUCCESS);
         TEST_CHECK(args.nsecs == 2);
         TEST_CHECK(args.nplaces == 3);
         TEST_CHECK(args.nthreads == 4);
@@ -108,7 +109,7 @@ void test_server_args_ctor(void) {
         char **argv = deconstify_argv(argc, argv_const);
 
         server_args_t args;
-        TEST_CHECK(server_args_ctor(&args, argc, argv, MAX_THREADS) == EXIT_SUCCESS);
+        TEST_CHECK(server_args_ctor(&args, argc, argv, MAX_THREADS, MAX_PLACES) == EXIT_SUCCESS);
         TEST_CHECK(args.nsecs == 2);
         TEST_CHECK(strcmp(args.fifoname, "/tmp/fifopath") == 0);
         TEST_CHECK(args.nplaces == 3);
@@ -123,9 +124,9 @@ void test_server_args_ctor(void) {
         char **argv = deconstify_argv(argc, argv_const);
 
         server_args_t args;
-        TEST_CHECK(server_args_ctor(&args, argc, argv, MAX_THREADS) == EXIT_SUCCESS);
+        TEST_CHECK(server_args_ctor(&args, argc, argv, MAX_THREADS, MAX_PLACES) == EXIT_SUCCESS);
         TEST_CHECK(args.nsecs == 5);
-        TEST_CHECK(args.nplaces == INT_MAX);
+        TEST_CHECK(args.nplaces == MAX_PLACES);
         TEST_CHECK(args.nthreads == MAX_THREADS);
         TEST_CHECK(strcmp(args.fifoname, "/tmp/fifopath") == 0);
         TEST_CHECK(server_args_dtor(&args) == EXIT_SUCCESS);
