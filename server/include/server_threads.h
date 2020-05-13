@@ -4,7 +4,7 @@
 #include "message.h"
 #include <semaphore.h>
 
-sem_t s;
+sem_t semaphore;
 
 /**
  * @brief Initialize server threads stuff.
