@@ -18,7 +18,13 @@
 
 #### Managing threads
 
-We used a semaphore to manage the number of active threads, since the number of threads is a common resource over which there will be race conditions.
+On the server side, where a restriction of the number of creatable threads can be imposed by way of the argument "-n", we used a semaphore to manage the number of active threads, since the number of threads is a common resource over which there will be race conditions.
+
+On the client side however, we use a custom wrapper around a long long int [atomic_lli](common/src/common_atomic.c), where by making use of a mutex, we also solve the syncronization problem.
+
+#### Managing bathroom access
+
+For the access to the bathroom we used another semaphore, that tracks the number of free spots in the bathroom, alongside an array of bools indicating which exact spots are free. This last part was needed so that the responses to the client threads could carry information of the place the client entered at.
 
 ## Make commands
 

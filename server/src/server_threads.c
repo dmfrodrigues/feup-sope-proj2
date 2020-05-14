@@ -20,14 +20,11 @@
 #define EMPTY_FIFO_TIME_MILLIS  100         // Time the server will receive 2LATE requests after the time it was supposed to stop working
 #define SEMAPHORE_SHARED        0           // Semaphore is not shared among several processes
 
-atomic_lli_t* num_processed_requests = NULL;
-
 int number_places;
 int max_threads;
 bool *spots = NULL;
 
 int server_threads_init(int nplaces, int nthreads){
-    num_processed_requests = atomic_lli_ctor();
     spots = calloc(nplaces, sizeof(bool));
     number_places = nplaces;
     max_threads = nthreads;
@@ -37,7 +34,6 @@ int server_threads_init(int nplaces, int nthreads){
 }
 
 int server_threads_clean(void){
-    atomic_lli_dtor(num_processed_requests); num_processed_requests = NULL;
     free(spots);
     return EXIT_SUCCESS;
 }
@@ -89,13 +85,10 @@ void* server_thread_func(void *arg){
     return ret;
 }
 
-/**
- * @brief Attempts to enter bathroom, creating a new server thread in the process.
- * 
- * @param m     Pointer to message to be processed
- * @return int  EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
- */
-int try_entering(message_t *m_){
+int server_create_thread(const message_t *m){
+    message_t *m_ = malloc(sizeof(message_t));
+    *m_ = *m;
+    
     sem_wait(&place_semaphore);
 
     if (timeup_server) {
@@ -126,13 +119,6 @@ int try_entering(message_t *m_){
     }
 
     return EXIT_FAILURE;
-}
-
-int server_create_thread(const message_t *m){
-    message_t *m_ = malloc(sizeof(message_t));
-    *m_ = *m;
-    
-    return try_entering(m_);
 }
 
 int server_close_service(const char *public_fifo_path){
