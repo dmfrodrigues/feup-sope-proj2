@@ -34,8 +34,6 @@ int main(int argc, char *argv[]){
     message_t message;
     while(!timeup_server){
 
-        // sem_wait(&s);
-
         // Open public fifo
         int public_fifo_filedes = open(args.fifoname, O_RDONLY);
         if(public_fifo_filedes == -1){

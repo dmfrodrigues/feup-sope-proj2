@@ -29,7 +29,7 @@ int server_threads_init(int nplaces, int nthreads){
     number_places = nplaces;
     max_threads = nthreads;
     if(sem_init(&thread_semaphore, SEMAPHORE_SHARED, max_threads) != EXIT_SUCCESS) return EXIT_FAILURE;
-    if (sem_init(&place_semaphore, SEMAPHORE_SHARED, number_places) != EXIT_SUCCESS) return EXIT_FAILURE;
+    if(sem_init(&place_semaphore, SEMAPHORE_SHARED, number_places) != EXIT_SUCCESS) return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
 
