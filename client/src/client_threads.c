@@ -46,7 +46,8 @@ int client_threads_init(void){
     return EXIT_SUCCESS;
 }
 int client_threads_clear(void){
-    if(atomic_lli_dtor(num_threads)) return EXIT_FAILURE; num_threads = NULL;   // Destruct num_threads
+    if(atomic_lli_dtor(num_threads)) return EXIT_FAILURE;               // Destruct num_threads
+    num_threads = NULL;
     return EXIT_SUCCESS;
 }
 
@@ -90,15 +91,15 @@ void *client_execute_thread(void *arg) {
     message_t ans;
     if(read(private_fifo_filedes, &ans, sizeof(message_t)) != sizeof(message_t)){ *ret = EXIT_FAILURE; return ret; }
     if(ans.pl != -1) {
-        if(output(&ans, op_IAMIN)){ *ret = EXIT_FAILURE; return ret; }
+        if(output(&ans, op_IAMIN))              { *ret = EXIT_FAILURE; return ret; }
     } else {
-        if(output(&ans, op_CLOSD)){ *ret = EXIT_FAILURE; return ret; }
-        atomic_lli_set(timeup_client, 1);
+        if(output(&ans, op_CLOSD))              { *ret = EXIT_FAILURE; return ret; }
+        if(atomic_lli_set(timeup_client, 1))    { *ret = EXIT_FAILURE; return ret; }
     }
-    if(close(private_fifo_filedes))     { *ret = EXIT_FAILURE; return ret; }                // Close private fifo
-    if(unlink(private_fifo_path))       { *ret = EXIT_FAILURE; return ret; }                // Delete fifo
-    if(client_thread_args_dtor(args))   { *ret = EXIT_FAILURE; return ret; } free(args);    // Free arguments
-    if(atomic_lli_dec(num_threads))     { *ret = EXIT_FAILURE; return ret; }                // Decrement num_threads (as we are about to exit this thread)
+    if(close(private_fifo_filedes))             { *ret = EXIT_FAILURE; return ret; }                // Close private fifo
+    if(unlink(private_fifo_path))               { *ret = EXIT_FAILURE; return ret; }                // Delete fifo
+    if(client_thread_args_dtor(args))           { *ret = EXIT_FAILURE; return ret; } free(args);    // Free arguments
+    if(atomic_lli_dec(num_threads))             { *ret = EXIT_FAILURE; return ret; }                // Decrement num_threads (as we are about to exit this thread)
     return ret;
 }
 

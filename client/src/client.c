@@ -38,7 +38,7 @@ int main(int argc, char *argv[]){
         pthread_t dummy; pthread_create(&dummy, NULL, client_execute_thread, thread_args);
         if(atomic_lli_get(timeup_client, &timeup_client_value))                             return EXIT_FAILURE;
     }
-    client_wait_all_threads();                                                          // Wait for all threads to finish
+    if(client_wait_all_threads())       return EXIT_FAILURE;                            // Wait for all threads to finish
     // Cleanup
     if(atomic_lli_dtor(timeup_client))  return EXIT_FAILURE;                            // Destruct timeup_client
     if(client_args_dtor(&args))         return EXIT_FAILURE;                            // Destruct arguments structure
