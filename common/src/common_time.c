@@ -7,13 +7,14 @@
 #include <sys/time.h>
 
 #define MICROS_TO_MILLIS    0.001   // from microseconds to ms
-#define MILLIS_TO_NANOS     1000000 // from ms to ns
+#define MILLIS_TO_NANOS     1000000L // from ms to ns
+#define SECONDS_TO_MICROS   1000000L // from s to micros
 
 int get_microseconds_since_epoch(micro_t *t) __attribute__((warn_unused_result));
 int get_microseconds_since_epoch(micro_t *t){
     struct timeval tv;
     if(gettimeofday(&tv, NULL)) return EXIT_FAILURE;
-    *t = (micro_t)(tv.tv_sec)*1000000L + (micro_t)(tv.tv_usec);
+    *t = (micro_t)(tv.tv_sec)*SECONDS_TO_MICROS + (micro_t)(tv.tv_usec);
     return EXIT_SUCCESS;
 }
 
