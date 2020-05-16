@@ -26,7 +26,7 @@ int main(int argc, char *argv[]){
     // Initialize
     timeup_server = false;                                                          // Initialize timeup_server
     if(server_args_ctor(&args, argc, argv, MAX_THREADS, MAX_PLACES)) return EXIT_FAILURE;        // Construct arguments structure from argc/argv
-    if(server_threads_init(args.nplaces, args.nplaces)) return EXIT_FAILURE;        // Initialize threads
+    if(server_threads_init(args.nplaces, args.nthreads))return EXIT_FAILURE;        // Initialize threads
     if(server_install_handlers())                       return EXIT_FAILURE;        // Install alarm handler
     if(alarm(args.nsecs))                               return EXIT_FAILURE;        // Register alarm
     if(mkfifo(args.fifoname, 0660))                     return EXIT_FAILURE;        // Create public FIFO
