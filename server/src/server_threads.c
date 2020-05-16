@@ -25,7 +25,7 @@ int max_threads;
 bool *spots = NULL;
 
 int server_threads_init(int nplaces, int nthreads){
-    spots = calloc(nplaces, sizeof(bool));
+    spots = calloc(nplaces, sizeof(bool)); if (spots == NULL) return EXIT_FAILURE;
     number_places = nplaces;
     max_threads = nthreads;
     if(sem_init(&thread_semaphore, SEMAPHORE_SHARED, max_threads) != EXIT_SUCCESS) return EXIT_FAILURE;
@@ -62,7 +62,7 @@ int server_thread_answer(const message_t *request, const message_t *response){
 
 void* server_thread_func(void *arg) __attribute__((warn_unused_result));
 void* server_thread_func(void *arg){
-    int *ret = malloc(sizeof(int));
+    int *ret = malloc(sizeof(int)); if (ret == NULL) { *ret = EXIT_FAILURE; return ret; }
     *ret = EXIT_SUCCESS;
 
     message_t *request = (message_t*)arg;
@@ -91,7 +91,7 @@ void* server_thread_func(void *arg){
 }
 
 int server_create_thread(const message_t *m){
-    message_t *m_ = malloc(sizeof(message_t));
+    message_t *m_ = malloc(sizeof(message_t)); if (m_ == NULL) return EXIT_FAILURE;
     *m_ = *m;
 
     while(sem_wait(&thread_semaphore)) if(errno != EINTR) { fprintf(stderr, "Could not wait\n"); return EXIT_FAILURE; }

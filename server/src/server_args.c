@@ -10,7 +10,7 @@
 
 static const server_args_t SERVER_ARGS_DEFAULT = { 
     .nsecs = -1,
-    .nplaces = INT_MAX,
+    .nplaces = 1024,
     .nthreads = 1000000000,
     .fifoname = NULL
 };

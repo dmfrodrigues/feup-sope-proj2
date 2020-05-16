@@ -16,7 +16,7 @@
 
 #include "common_time.h"
 
-#define MAX_THREADS 1000000
+#define MAX_THREADS 1000000000
 #define MAX_PLACES 1024
 
 server_args_t args;                                                                 // Arguments structure
