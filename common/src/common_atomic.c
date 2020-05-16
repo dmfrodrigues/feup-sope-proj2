@@ -20,29 +20,27 @@ int atomic_lli_dtor(atomic_lli_t *p){
     free(p);
     return EXIT_SUCCESS;
 }
-void atomic_lli_set(atomic_lli_t *p, long long int n){
-    pthread_mutex_lock(&p->mutex);
+int atomic_lli_set(atomic_lli_t *p, long long int n){
+    if(pthread_mutex_lock(&p->mutex))   return EXIT_FAILURE;
     p->n = n;
-    pthread_mutex_unlock(&p->mutex);
+    if(pthread_mutex_unlock(&p->mutex)) return EXIT_FAILURE;
+    return EXIT_SUCCESS;
 }
-long long int atomic_lli_get(atomic_lli_t *p){
-    long long int n;
-    pthread_mutex_lock(&p->mutex);
-    n = p->n;
-    pthread_mutex_unlock(&p->mutex);
-    return n;
+int atomic_lli_get(atomic_lli_t *p, long long int *n){
+    if(pthread_mutex_lock(&p->mutex))   return EXIT_FAILURE;
+    *n = p->n;
+    if(pthread_mutex_unlock(&p->mutex)) return EXIT_FAILURE;
+    return EXIT_SUCCESS;
 }
-long long int atomic_lli_postinc(atomic_lli_t *p){
-    long long int n;
-    pthread_mutex_lock(&p->mutex);
-    n = p->n++;
-    pthread_mutex_unlock(&p->mutex);
-    return n;
+int atomic_lli_inc(atomic_lli_t *p){
+    if(pthread_mutex_lock(&p->mutex))   return EXIT_FAILURE;
+    p->n++;
+    if(pthread_mutex_unlock(&p->mutex)) return EXIT_FAILURE;
+    return EXIT_SUCCESS;
 }
-long long int atomic_lli_postdec(atomic_lli_t *p){
-    long long int n;
-    pthread_mutex_lock(&p->mutex);
-    n = p->n--;
-    pthread_mutex_unlock(&p->mutex);
-    return n;
+int atomic_lli_dec(atomic_lli_t *p){
+    if(pthread_mutex_lock(&p->mutex))   return EXIT_FAILURE;
+    p->n--;
+    if(pthread_mutex_unlock(&p->mutex)) return EXIT_FAILURE;
+    return EXIT_SUCCESS;
 }

@@ -48,7 +48,10 @@ int server_threads_clean(void){
 int server_thread_answer(const message_t *request, const message_t *response){
     int ret = EXIT_SUCCESS;
     char private_fifo_path[PATH_MAX];
-    if(sprintf(private_fifo_path, "/tmp/%d.%lu", request->pid, request->tid) < 0) return EXIT_FAILURE;
+    if(sprintf(private_fifo_path, "/tmp/%d.%lu", request->pid, request->tid) < 0){
+        if(output(response, op_GAVUP)) return EXIT_FAILURE;
+        return EXIT_FAILURE;
+    }
     int private_fifo_filedes = open(private_fifo_path, O_WRONLY);
     if(private_fifo_filedes < 0) { output(request, op_GAVUP); return EXIT_FAILURE; }
     if(write(private_fifo_filedes, response, sizeof(message_t)) != sizeof(message_t)) ret = EXIT_FAILURE;
