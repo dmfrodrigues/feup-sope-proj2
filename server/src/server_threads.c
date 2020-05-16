@@ -168,11 +168,11 @@ int server_close_service(const char *public_fifo_path){
 }
 
 int server_wait_all_threads(void){
-    int x; 
-    if (sem_getvalue(&thread_semaphore, &x)) return EXIT_FAILURE;
-    while(x < max_threads){
+    int thread_semaphore_value; 
+    if (sem_getvalue(&thread_semaphore, &thread_semaphore_value)) return EXIT_FAILURE;
+    while(thread_semaphore_value < max_threads){
         if(usleep(SLEEP_MICROSECONDS)) return EXIT_FAILURE;
-        if (sem_getvalue(&thread_semaphore, &x)) return EXIT_FAILURE;
+        if (sem_getvalue(&thread_semaphore, &thread_semaphore_value)) return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
 }
