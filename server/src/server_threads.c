@@ -77,8 +77,8 @@ void* server_thread_func(void *arg){
     
     spots[request->pl] = false;
 
-    sem_post(&thread_semaphore);
-    sem_post(&place_semaphore);
+    if(sem_post(&thread_semaphore)){ fprintf(stderr, "Could not post\n"); *ret = EXIT_FAILURE; }
+    if(sem_post(&place_semaphore )){ fprintf(stderr, "Could not post\n"); *ret = EXIT_FAILURE; }
     
     //Routine stuff
     free(arg);
@@ -88,8 +88,9 @@ void* server_thread_func(void *arg){
 int server_create_thread(const message_t *m){
     message_t *m_ = malloc(sizeof(message_t));
     *m_ = *m;
-    
-    sem_wait(&place_semaphore);
+
+    while(sem_wait(&thread_semaphore)) if(errno != EINTR) { fprintf(stderr, "Could not wait\n"); return EXIT_FAILURE; }
+    while(sem_wait(&place_semaphore )) if(errno != EINTR) { fprintf(stderr, "Could not wait\n"); return EXIT_FAILURE; }
 
     if (timeup_server) {
         output(m_, op_2LATE);
@@ -102,8 +103,8 @@ int server_create_thread(const message_t *m){
         };
         server_thread_answer(m_, &response);
 
-        sem_post(&thread_semaphore);
-        sem_post(&place_semaphore);
+        if(sem_post(&thread_semaphore)){ fprintf(stderr, "Could not post\n"); return EXIT_FAILURE; }
+        if(sem_post(&place_semaphore )){ fprintf(stderr, "Could not post\n"); return EXIT_FAILURE; }
 
         return EXIT_SUCCESS;
     }

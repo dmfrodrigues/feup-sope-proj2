@@ -44,7 +44,6 @@ int main(int argc, char *argv[]){
         // Read messages
         int r;
         while((r = read(public_fifo_filedes, &message, sizeof(message_t))) == sizeof(message_t)){
-            sem_wait(&thread_semaphore);
             if(output(&message, op_RECVD)){ ret = EXIT_FAILURE; break; }
             if(server_create_thread(&message)){ ret = EXIT_FAILURE; break; }
         }
