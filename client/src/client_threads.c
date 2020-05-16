@@ -72,7 +72,7 @@ void *client_execute_thread(void *arg) {
     if(mkfifo(private_fifo_path, 0660))                                         {*ret = EXIT_FAILURE; return ret; }
     // Send request via fifoname
     int req;
-    if ((req = client_send_request(args->public_fifoname, m)) != EXIT_SUCCESS){ 
+    if ((req = client_send_request(args->public_fifoname, m))){ 
         if (req == 2){
             m.dur = -1;
             m.pl = -1;

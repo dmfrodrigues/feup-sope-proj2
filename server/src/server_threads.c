@@ -28,8 +28,8 @@ int server_threads_init(int nplaces, int nthreads){
     spots = calloc(nplaces, sizeof(bool)); if (spots == NULL) return EXIT_FAILURE;
     number_places = nplaces;
     max_threads = nthreads;
-    if(sem_init(&thread_semaphore, SEMAPHORE_SHARED, max_threads) != EXIT_SUCCESS) return EXIT_FAILURE;
-    if(sem_init(&place_semaphore, SEMAPHORE_SHARED, number_places) != EXIT_SUCCESS) return EXIT_FAILURE;
+    if(sem_init(&thread_semaphore, SEMAPHORE_SHARED, max_threads)) return EXIT_FAILURE;
+    if(sem_init(&place_semaphore, SEMAPHORE_SHARED, number_places)) return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
 
