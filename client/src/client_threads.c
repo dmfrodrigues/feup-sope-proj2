@@ -41,7 +41,6 @@ int client_send_request(char *pathname, message_t to_send) {
 static atomic_lli_t *num_threads = NULL;                // Number of active threads
 int client_threads_init(void){
     num_threads = atomic_lli_ctor();                    // Initialize num_threads
-    if(num_threads == NULL) return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
 int client_threads_clear(void){
@@ -50,10 +49,9 @@ int client_threads_clear(void){
 }
 
 void *client_execute_thread(void *arg) {
+    atomic_lli_postinc(num_threads);                                    // Increment num_threads (as we are entering a new thread)
+
     int *ret = malloc(sizeof(int)); *ret = EXIT_SUCCESS;                // Allocate for ret
-
-    if(atomic_lli_inc(num_threads)) {*ret = EXIT_FAILURE; return ret; } // Increment num_threads (as we are entering a new thread)
-
     client_thread_args_t *args = (client_thread_args_t *)arg;           // Convert to proper argument type
     // Create message
     message_t m;
@@ -64,8 +62,8 @@ void *client_execute_thread(void *arg) {
     m.pl  = REQUEST_PL_FIELD;
     // Create private fifo
     char private_fifo_path[PATH_MAX];
-    if(sprintf(private_fifo_path, "/tmp/%d.%lu", getpid(), pthread_self()) < 0) {*ret = EXIT_FAILURE; return ret; }
-    if(mkfifo(private_fifo_path, 0660))                                         {*ret = EXIT_FAILURE; return ret; }
+    sprintf(private_fifo_path, "/tmp/%d.%lu", getpid(), pthread_self());
+    mkfifo(private_fifo_path, 0660);
     // Send request via fifoname
     int req;
     if ((req = client_send_request(args->public_fifoname, m)) != EXIT_SUCCESS){ 
@@ -75,7 +73,7 @@ void *client_execute_thread(void *arg) {
             if(output(&m, op_FAILD))            {*ret = EXIT_FAILURE; return ret; }             // Output FAILD message
             if(unlink(private_fifo_path))       {*ret = EXIT_FAILURE; return ret; }             // Delete fifo
             if(client_thread_args_dtor(args))   {*ret = EXIT_FAILURE; return ret; } free(args); // Free arguments
-            if(atomic_lli_dec(num_threads))     {*ret = EXIT_FAILURE; return ret; }             // Decrement number of threads
+            atomic_lli_postdec(num_threads);                                                    // Decrement number of threads
             *ret = EXIT_SUCCESS; return ret; 
         }
         *ret = EXIT_FAILURE; return ret;
@@ -95,17 +93,15 @@ void *client_execute_thread(void *arg) {
     if(close(private_fifo_filedes))     { *ret = EXIT_FAILURE; return ret; }                // Close private fifo
     if(unlink(private_fifo_path))       { *ret = EXIT_FAILURE; return ret; }                // Delete fifo
     if(client_thread_args_dtor(args))   { *ret = EXIT_FAILURE; return ret; } free(args);    // Free arguments
-    if(atomic_lli_dec(num_threads))     { *ret = EXIT_FAILURE; return ret; }                // Decrement num_threads (as we are about to exit this thread)
+    atomic_lli_postdec(num_threads);                                                        // Decrement num_threads (as we are about to exit this thread)
     return ret;
 }
 
 #define SLEEP_MICROSECONDS 10000
 
 int client_wait_all_threads(void){
-    long long int num_threads_value;
     while(true){
-        if(atomic_lli_get(num_threads, &num_threads_value)) return EXIT_FAILURE;
-        if(num_threads_value <= 0) return EXIT_SUCCESS;
+        if(atomic_lli_get(num_threads) <= 0) return EXIT_SUCCESS;
         if(usleep(SLEEP_MICROSECONDS)) return EXIT_FAILURE;
     }
 }

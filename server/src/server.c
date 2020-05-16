@@ -30,10 +30,6 @@ int main(int argc, char *argv[]){
     if(server_install_handlers())                       return EXIT_FAILURE;        // Install alarm handler
     if(alarm(args.nsecs))                               return EXIT_FAILURE;        // Register alarm
     if(mkfifo(args.fifoname, 0660))                     return EXIT_FAILURE;        // Create public FIFO
-
-    milli_t start_time; common_gettime(&start_time);
-    milli_t now_time = start_time;
-
     // Read requests
     message_t message;
     while(!timeup_server){
@@ -56,19 +52,12 @@ int main(int argc, char *argv[]){
         close(public_fifo_filedes);
     }
 
-    common_gettime(&now_time); printf("%lld\n", now_time-start_time);
-
     if (server_close_service(args.fifoname)) ret = EXIT_FAILURE;
-
-    common_gettime(&now_time); printf("%lld\n", now_time-start_time);
-
     // Cleanup
     if(server_args_dtor(&args))         return EXIT_FAILURE;
     if(server_threads_clean())          return EXIT_FAILURE;
     if(sem_destroy(&thread_semaphore))  return EXIT_FAILURE;
     if(sem_destroy(&place_semaphore))   return EXIT_FAILURE;
-
-    common_gettime(&now_time); printf("%lld\n", now_time-start_time);
 
     return ret;
 }

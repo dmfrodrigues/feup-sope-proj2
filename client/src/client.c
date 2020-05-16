@@ -25,18 +25,15 @@ int main(int argc, char *argv[]){
     milli_t start_time; if(common_gettime(&start_time)) return EXIT_FAILURE;            // Start time
     milli_t now_time;   if(common_gettime(&now_time))   return EXIT_FAILURE;            // Time now
     // Launch threads
-    long long int timeup_client_value;
-    atomic_lli_get(timeup_client, &timeup_client_value);
-    for (int res = EXIT_SUCCESS, n = 0;                                                 // res is used to check for errors in common_gettime; n is the request number
-      !res && (now_time - start_time) < runtime_ms && timeup_client_value;              // While there is no error, time has not run out and we were not notified of the bathroom closing
-      res = common_gettime(&now_time), ++n){                                            // Get new value for now_time, increment n
+    for(int res = EXIT_SUCCESS, n = 0;                                                  // res is used to check for errors in common_gettime; n is the request number
+        !res && (now_time - start_time) < runtime_ms && !atomic_lli_get(timeup_client); // While there is no error, time has not run out and we were not notified of the bathroom closing
+        res = common_gettime(&now_time), ++n){                                          // Get new value for now_time, increment n
         if(common_wait(random_range(10, 20))) return EXIT_FAILURE;                      // Waiting between requests
         // Create thread
         client_thread_args_t *thread_args = malloc(sizeof(client_thread_args_t));
         if(thread_args == NULL)                                                             return EXIT_FAILURE;
         if(client_thread_args_ctor(thread_args, n, random_range(100, 200), args.fifoname))  return EXIT_FAILURE;
         pthread_t dummy; pthread_create(&dummy, NULL, client_execute_thread, thread_args);
-        atomic_lli_get(timeup_client, &timeup_client_value);
     }
     client_wait_all_threads();                                                          // Wait for all threads to finish
     // Cleanup
