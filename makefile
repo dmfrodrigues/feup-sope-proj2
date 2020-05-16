@@ -28,6 +28,7 @@ clean:
 	make -C $(SERVERDIR) clean
 	rm -f $(CLIENTNEWAPP)
 	rm -f $(SERVERNEWAPP)
+	rm -f $(GROUP).zip
 
 # Test code
 test: all
@@ -60,3 +61,4 @@ testzip: zip
 	rm -rf $(DEST)/$(GROUP)
 	unzip $(GROUP).zip -d $(DEST)
 	make -C $(DEST)/$(GROUP)/ test
+	rm -rf $(DEST)/$(GROUP)
