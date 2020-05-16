@@ -16,3 +16,10 @@ test/test06.sh
 test/test07.sh
 test/test08.sh
 test/test09.sh
+test/test10.sh
+test/test11.sh
+test/test12.sh
+test/test13.sh
+test/test14.sh
+test/test15.sh
+test/test16.sh
