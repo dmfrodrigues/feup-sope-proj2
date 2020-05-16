@@ -39,6 +39,7 @@ int server_args_ctor(server_args_t *p, int argc, char *argv[], int max_threads, 
     }
 
     if (p->nsecs    == SERVER_ARGS_DEFAULT.nsecs    ||                                          // If time was not set, or
+        p->nsecs <= 0 ||                                                                         // If time is negative, or
         p->nthreads > max_threads ||                                                            // if the number of threads is larger than the max number of threads, or
         p->nthreads <= 0 ||                                                                     // If the number of threads is not greater than 0, or
         p->nplaces  <= 0 ||                                                                     // If the number of places is not greater than 0, or

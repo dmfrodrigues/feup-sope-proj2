@@ -32,6 +32,7 @@ int client_args_ctor(client_args_t *p, int argc, char *argv[]){
     }
 
     if (p->nsecs == CLIENT_ARGS_DEFAULT.nsecs ||                                            // If time was not set, or
+        p->nsecs <= 0 ||                                                                    // If it is negative, or
         argc - optind != 1) return EXIT_FAILURE;                                            // if there are more than one arguments that are not options
     // Get fifoname
     p->fifoname = calloc(strlen(argv[optind])+strlen(FIFO_PREFIX)+1, sizeof(char));
