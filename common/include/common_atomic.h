@@ -27,27 +27,27 @@ int atomic_lli_dtor(atomic_lli_t *p);
  * @param p atomic_lli to be set
  * @param n new value
  */
-void atomic_lli_set(atomic_lli_t *p, long long int n);
+int atomic_lli_set(atomic_lli_t *p, long long int n);
 /**
  * @brief Get value of atomic_lli.
  * 
  * @param p atomic_lli to get value from.
  * @return long long int value of the atomic_lli
  */
-long long int atomic_lli_get(atomic_lli_t *p);
+int atomic_lli_get(atomic_lli_t *p, long long int *n);
 /**
- * @brief Post-increment atomic_lli.
+ * @brief Increment atomic_lli.
  * 
- * @param p atomic_lli to be post-incremented
+ * @param p atomic_lli to be incremented
  * @return long long int value of atomic_lli before incrementing
  */
-long long int atomic_lli_postinc(atomic_lli_t *p);
+int atomic_lli_inc(atomic_lli_t *p);
 /**
- * @brief Post-decrement atomic_lli.
+ * @brief Decrement atomic_lli.
  * 
- * @param p atomic_lli to be post-decremented.
+ * @param p atomic_lli to be decremented.
  * @return long long int value
  */
-long long int atomic_lli_postdec(atomic_lli_t *p);
+int atomic_lli_dec(atomic_lli_t *p);
 
 #endif //COMMON_ATOMIC_H_INCLUDED
