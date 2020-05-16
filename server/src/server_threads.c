@@ -45,6 +45,7 @@ int server_threads_clean(void){
  * @param response  Response to a request
  * @return int      EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
+int server_thread_answer(const message_t *request, const message_t *response) __attribute__((warn_unused_result));
 int server_thread_answer(const message_t *request, const message_t *response){
     int ret = EXIT_SUCCESS;
     char private_fifo_path[PATH_MAX];
@@ -56,6 +57,7 @@ int server_thread_answer(const message_t *request, const message_t *response){
     return ret;
 }
 
+void* server_thread_func(void *arg) __attribute__((warn_unused_result));
 void* server_thread_func(void *arg){
     int *ret = malloc(sizeof(int));
     *ret = EXIT_SUCCESS;

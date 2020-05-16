@@ -11,6 +11,6 @@ volatile sig_atomic_t timeup_server;
  * 
  * @return int EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int server_install_handlers(void);
+int server_install_handlers(void) __attribute__((warn_unused_result));
 
 #endif //SERVER_SIGNAL_H_INCLUDED

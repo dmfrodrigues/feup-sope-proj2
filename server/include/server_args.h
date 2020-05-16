@@ -42,6 +42,6 @@ int server_args_ctor(server_args_t *p, int argc, char *argv[], int max_threads, 
  * @param p     Pointer to server_args_t to destruct
  * @return int  EXIT_SUCCESS if successful
  */
-int server_args_dtor(server_args_t *p);
+int server_args_dtor(server_args_t *p) __attribute__((warn_unused_result));
 
 #endif //SERVER_ARGS_H_INCLUDED

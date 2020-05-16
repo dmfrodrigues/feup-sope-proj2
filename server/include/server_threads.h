@@ -14,14 +14,14 @@ sem_t place_semaphore;
  * 
  * @return int EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int server_threads_init(int nplaces, int nthreads);
+int server_threads_init(int nplaces, int nthreads) __attribute__((warn_unused_result));
 
 /**
  * @brief Cleanup server threads stuff.
  * 
  * @return int EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int server_threads_clean(void);
+int server_threads_clean(void) __attribute__((warn_unused_result));
 
 /**
  * @brief Create new thread to process a message.
@@ -31,14 +31,14 @@ int server_threads_clean(void);
  * @param m     Pointer to message to be processed
  * @return int  EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int server_create_thread(const message_t *m);
+int server_create_thread(const message_t *m) __attribute__((warn_unused_result));
 
 /**
  * @brief Wait for all threads to finish.
  * 
  * @return int EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int server_wait_all_threads(void);
+int server_wait_all_threads(void) __attribute__((warn_unused_result));
 
 /**
  * @brief Clears public FIFO "buffer" and closes server
@@ -46,6 +46,6 @@ int server_wait_all_threads(void);
  * @param public_fifo_path public FIFO
  * @return int EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int server_close_service(const char *public_fifo_path);
+int server_close_service(const char *public_fifo_path) __attribute__((warn_unused_result));
 
 #endif //SERVER_THREADS_H_INCLUDED
