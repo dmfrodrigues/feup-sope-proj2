@@ -25,7 +25,7 @@ int max_threads;
 bool *spots = NULL;
 
 int server_threads_init(int nplaces, int nthreads){
-    spots = calloc(nplaces, sizeof(bool)); if(spots == NULL) return EXIT_FAILURE;
+    spots = calloc(nplaces, sizeof(bool)); if (spots == NULL) return EXIT_FAILURE;
     number_places = nplaces;
     max_threads = nthreads;
     if(sem_init(&thread_semaphore, SEMAPHORE_SHARED, max_threads) != EXIT_SUCCESS) return EXIT_FAILURE;
