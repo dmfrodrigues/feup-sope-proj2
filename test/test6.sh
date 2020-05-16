@@ -6,7 +6,7 @@ ULOG=U.log
 QERR=Q.err
 UERR=U.err
 
-(timeout 2 ./Q2 -t 1 -n 1 -l 1 fifinho > $QLOG 2> $QERR; echo $? >> $QERR) &
+(timeout 2 ./Q2 -t 1 -n 1 -l 5 fifinho > $QLOG 2> $QERR; echo $? >> $QERR) &
 (timeout 3 ./U2 -t 2           fifinho > $ULOG 2> $UERR; echo $? >> $UERR) &
 sleep 4
 test/aval1.sh $ULOG $QLOG
