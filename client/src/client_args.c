@@ -26,7 +26,7 @@ int client_args_ctor(client_args_t *p, int argc, char *argv[]){
     while((opt = getopt(argc, argv, OPTSTRING)) != -1){                                     // While there are options to process
         switch(opt){
             case 't': if(sscanf(optarg, "%d", &p->nsecs) != 1)  return EXIT_FAILURE; break; // Time
-            case '?':                                           return EXIT_FAILURE;        // Unknown characters
+            case '?': optind = 1;                               return EXIT_FAILURE;        // Unknown characters
             default: optind = 1;                                return EXIT_FAILURE;        // Other errors
         }
     }
@@ -35,6 +35,7 @@ int client_args_ctor(client_args_t *p, int argc, char *argv[]){
         argc - optind != 1) return EXIT_FAILURE;                                            // if there are more than one arguments that are not options
     // Get fifoname
     p->fifoname = calloc(strlen(argv[optind])+strlen(FIFO_PREFIX)+1, sizeof(char));
+    if(p->fifoname == NULL) return EXIT_FAILURE;
     strcat(strcpy(p->fifoname, FIFO_PREFIX), argv[optind]);
 
     return EXIT_SUCCESS;

@@ -25,7 +25,7 @@ int max_threads;
 bool *spots = NULL;
 
 int server_threads_init(int nplaces, int nthreads){
-    spots = calloc(nplaces, sizeof(bool));
+    spots = calloc(nplaces, sizeof(bool)); if(spots == NULL) return EXIT_FAILURE;
     number_places = nplaces;
     max_threads = nthreads;
     if(sem_init(&thread_semaphore, SEMAPHORE_SHARED, max_threads) != EXIT_SUCCESS) return EXIT_FAILURE;
@@ -62,7 +62,7 @@ int server_thread_answer(const message_t *request, const message_t *response){
 
 void* server_thread_func(void *arg) __attribute__((warn_unused_result));
 void* server_thread_func(void *arg){
-    int *ret = malloc(sizeof(int));
+    int *ret = malloc(sizeof(int)); if(ret == NULL) return NULL;
     *ret = EXIT_SUCCESS;
 
     message_t *request = (message_t*)arg;
@@ -90,23 +90,20 @@ void* server_thread_func(void *arg){
     return ret;
 }
 
-int server_create_thread(const message_t *m){
-    message_t *m_ = malloc(sizeof(message_t));
-    *m_ = *m;
-
+int server_create_thread(const message_t *request){
     while(sem_wait(&thread_semaphore)) if(errno != EINTR) { fprintf(stderr, "Could not wait\n"); return EXIT_FAILURE; }
     while(sem_wait(&place_semaphore )) if(errno != EINTR) { fprintf(stderr, "Could not wait\n"); return EXIT_FAILURE; }
 
     if (timeup_server) {
-        if(output(m_, op_2LATE)) return EXIT_FAILURE;
+        if(output(request, op_2LATE)) return EXIT_FAILURE;
         message_t response = {
-            .i = m_->i,
+            .i = request->i,
             .pid = getpid(),
             .tid = pthread_self(),
             .dur = -1,
             .pl = -1
         };
-        if(server_thread_answer(m_, &response)) return EXIT_FAILURE;
+        if(server_thread_answer(request, &response)) return EXIT_FAILURE;
 
         if(sem_post(&thread_semaphore)){ fprintf(stderr, "Could not post\n"); return EXIT_FAILURE; }
         if(sem_post(&place_semaphore )){ fprintf(stderr, "Could not post\n"); return EXIT_FAILURE; }
@@ -114,12 +111,15 @@ int server_create_thread(const message_t *m){
         return EXIT_SUCCESS;
     }
 
+    message_t *response = malloc(sizeof(message_t)); if(response == NULL) return EXIT_FAILURE;
+    *response = *request;
+
     for (int i = 0 ; i < number_places ; i++){
         if (!spots[i]){
-            m_->pl = i;
+            response->pl = i;
             spots[i] = true;
             pthread_t tid_dummy;
-            pthread_create(&tid_dummy, NULL, server_thread_func, m_);
+            if(pthread_create(&tid_dummy, NULL, server_thread_func, response)) return EXIT_FAILURE;
             return EXIT_SUCCESS;
         }
     }

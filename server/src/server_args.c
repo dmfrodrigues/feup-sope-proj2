@@ -46,6 +46,7 @@ int server_args_ctor(server_args_t *p, int argc, char *argv[], int max_threads, 
     }
     // Get fifoname
     p->fifoname = calloc(strlen(argv[optind])+strlen(FIFO_PREFIX)+1, sizeof(char));
+    if(p->fifoname == NULL) return EXIT_FAILURE;
     strcat(strcpy(p->fifoname, FIFO_PREFIX), argv[optind]);
 
     return EXIT_SUCCESS;

@@ -8,6 +8,7 @@ int client_thread_args_ctor(client_thread_args_t *p, int i, int dur, const char 
     p->i = i;
     p->dur = dur;
     p->public_fifoname = calloc(strlen(public_fifoname)+1, sizeof(char));
+    if(p->public_fifoname == NULL) return EXIT_FAILURE;
     strcpy(p->public_fifoname, public_fifoname);
     return EXIT_SUCCESS;
 }
