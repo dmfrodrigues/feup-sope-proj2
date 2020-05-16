@@ -14,3 +14,5 @@ test/test4.sh
 test/test5.sh
 test/test6.sh
 test/test7.sh
+test/test8.sh
+test/test9.sh
