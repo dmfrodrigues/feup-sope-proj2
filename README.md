@@ -14,23 +14,32 @@
     - [João António Cardoso Vieira e Basto de Sousa](https://github.com/JoaoASousa) ([up201806613@fe.up.pt](up201806613@fe.up.pt))
     - [Rafael Soares Ribeiro](https://github.com/up201806330) ([up201806330@fe.up.pt](mailto:up201806330@fe.up.pt))
 
-### Implementation details
+## Implementation details
 
-#### Managing threads
+### Managing threads
 
-On the server side, where a restriction of the number of creatable threads can be imposed by way of the argument "-n", we used a semaphore to manage the number of active threads, since the number of threads is a common resource over which there will be race conditions.
+On the server side, where a restriction of the number of creatable threads can be imposed by way of the argument `-n`, we used a semaphore to manage the number of active threads, since the number of threads is a common resource over which there will be race conditions.
 
 On the client side however, we use a custom wrapper around a long long int [atomic_lli](common/src/common_atomic.c), where by making use of a mutex, we also solve the syncronization problem. In this case the variable is simply used to wait for all threads to finish, not to impose on the creation of new threads like in the server.
 
-#### Managing bathroom access
+### Managing bathroom access
 
 For the access to the bathroom we used another semaphore, that tracks the number of free spots in the bathroom, alongside an array of bools indicating which exact spots are free. This last part was needed so that the responses to the client threads could carry information of the place the client entered at.
 
-#### Closing the service
+### Closing the service
 
-Upon the end of the server functioning time, the server will read from the public FIFO for 100 milliseconds and warn those clients that the service is closed. This is done to both make sure no request is left in the public FIFO but also to make sure the client receives at least one of these warnings, since the alternatives to this "timer" would either be: open the FIFO with the *O_NONBLOCK* flag and run the risk of exiting immediately without reporting to the client that the bathroom is closed, or opening without the flag and run the risk of blocking if there were in fact no more requests being sent through it.
+Upon the end of the server functioning time, the server will read from the public FIFO for 100 milliseconds and warn those clients that the service is closed. This is done to both make sure no request is left in the public FIFO but also to make sure the client receives at least one of these warnings, since the alternatives to this "timer" would either be: open the FIFO with the `O_NONBLOCK` flag and run the risk of exiting immediately without reporting to the client that the bathroom is closed, or opening without the flag and run the risk of blocking if there were in fact no more requests being sent through it.
 
-## Make commands
+
+## Installing
+
+If you are cloning from GitHub, you should pull all submodules with
+
+```sh
+git submodule update --init --recursive # If for the first time
+```
+
+### Make commands
 
 ```sh
 make          # Compile
