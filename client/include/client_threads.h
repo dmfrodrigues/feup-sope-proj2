@@ -14,14 +14,14 @@
  * 
  * @return int EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int client_threads_init(void);
+int client_threads_init(void) __attribute__((warn_unused_result));
 
 /**
  * @brief Cleanup client threads stuff.
  * 
  * @return int EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int client_threads_clear(void);
+int client_threads_clear(void) __attribute__((warn_unused_result));
 
 /**
  * @brief Function to be executed by a new thread.
@@ -36,6 +36,6 @@ void *client_execute_thread(void *arg);
  * 
  * @return int EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int client_wait_all_threads(void);
+int client_wait_all_threads(void) __attribute__((warn_unused_result));
 
 #endif //CLIENT_TBDNAME_H_INCLUDED

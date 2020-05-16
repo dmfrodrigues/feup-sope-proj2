@@ -39,6 +39,6 @@ int client_thread_args_ctor(client_thread_args_t *p, int i, int dur, const char 
  * @param p Pointer to object to destruct
  * @return int EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int client_thread_args_dtor(client_thread_args_t *p);
+int client_thread_args_dtor(client_thread_args_t *p) __attribute__((warn_unused_result));
 
 #endif //CLIENT_THREAD_ARGS_H_INCLUDED

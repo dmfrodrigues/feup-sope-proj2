@@ -22,6 +22,6 @@ typedef enum {
  * @param op    Operation to be registered
  * @return int  EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int output(const message_t *m, operation_t op);
+int output(const message_t *m, operation_t op) __attribute__((warn_unused_result));
 
 #endif

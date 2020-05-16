@@ -10,7 +10,7 @@ typedef long long micro_t;
  * @param d     Pointer to milli_t where time will be stored
  * @return int  EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int common_gettime(milli_t *t);
+int common_gettime(milli_t *t) __attribute__((warn_unused_result));
 
 /**
  * @brief Wait for millisecond intervals.
@@ -20,6 +20,6 @@ int common_gettime(milli_t *t);
  * @param d     Number of milliseconds to wait
  * @return int  EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int common_wait(milli_t t);
+int common_wait(milli_t t) __attribute__((warn_unused_result));
 
 #endif //COMMON_TIME_H_INCLUDED

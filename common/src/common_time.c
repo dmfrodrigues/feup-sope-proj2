@@ -9,6 +9,7 @@
 #define MICROS_TO_MILLIS    0.001   // from microseconds to ms
 #define MILLIS_TO_NANOS     1000000 // from ms to ns
 
+int get_microseconds_since_epoch(micro_t *t) __attribute__((warn_unused_result));
 int get_microseconds_since_epoch(micro_t *t){
     struct timeval tv;
     if(gettimeofday(&tv, NULL)) return EXIT_FAILURE;

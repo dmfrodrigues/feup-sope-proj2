@@ -21,20 +21,21 @@
 /**
  * @brief Sends request via the public fifo to the server
  * 
- * @param pathname      (public) fifo "identifier"
+ * @param public_fifo_name      (public) fifo "identifier"
  * @param to_send       request to be sent
  * @return int          EXIT_FAILURE if error, EXIT_SUCCESS otherwise
  */
-int client_send_request(char *pathname, message_t to_send) {
+int client_send_request(char *public_fifo_name, message_t request) __attribute__((warn_unused_result));
+int client_send_request(char *public_fifo_name, message_t request) {
     // Open fifo for writing
-    int fd_public_fifo = open(pathname, O_WRONLY);
-    if (fd_public_fifo == -1) {
+    int public_fifo_filedes = open(public_fifo_name, O_WRONLY);
+    if (public_fifo_filedes == -1) {
         if (errno == ENOENT) return 2;
         else return EXIT_FAILURE;
     }
-    if (write(fd_public_fifo, &to_send, sizeof(message_t)) == -1)   return EXIT_FAILURE;    // Write message to fifo
-    if (close(fd_public_fifo))                                      return EXIT_FAILURE;    // Close fifo
-    if (output(&to_send, op_IWANT))                                 return EXIT_FAILURE;    // Log
+    if (write(public_fifo_filedes, &request, sizeof(message_t)) == -1)   return EXIT_FAILURE;    // Write message to fifo
+    if (close(public_fifo_filedes))                                      return EXIT_FAILURE;    // Close fifo
+    if (output(&request, op_IWANT))                                 return EXIT_FAILURE;    // Log
     return EXIT_SUCCESS;
 }
 
@@ -45,12 +46,13 @@ int client_threads_init(void){
     return EXIT_SUCCESS;
 }
 int client_threads_clear(void){
-    atomic_lli_dtor(num_threads); num_threads = NULL;   // Destruct num_threads
+    if(atomic_lli_dtor(num_threads)) return EXIT_FAILURE; num_threads = NULL;   // Destruct num_threads
     return EXIT_SUCCESS;
 }
 
 void *client_execute_thread(void *arg) {
-    int *ret = malloc(sizeof(int)); *ret = EXIT_SUCCESS;                // Allocate for ret
+    int *ret = malloc(sizeof(int)); if(ret == NULL) return NULL;        // Allocate for ret
+    *ret = EXIT_SUCCESS;
     
     if(atomic_lli_inc(num_threads)) {*ret = EXIT_FAILURE; return ret; } // Increment num_threads (as we are entering a new thread)
 
@@ -65,8 +67,8 @@ void *client_execute_thread(void *arg) {
     };
     // Create private fifo
     char private_fifo_path[PATH_MAX];
-    sprintf(private_fifo_path, "/tmp/%d.%lu", getpid(), pthread_self());
-    mkfifo(private_fifo_path, 0660);
+    if(sprintf(private_fifo_path, "/tmp/%d.%lu", getpid(), pthread_self()) < 0) {*ret = EXIT_FAILURE; return ret; }
+    if(mkfifo(private_fifo_path, 0660))                                         {*ret = EXIT_FAILURE; return ret; }
     // Send request via fifoname
     int req;
     if ((req = client_send_request(args->public_fifoname, m)) != EXIT_SUCCESS){ 
