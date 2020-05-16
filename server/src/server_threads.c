@@ -51,7 +51,10 @@ int server_thread_answer(const message_t *request, const message_t *response){
     char private_fifo_path[PATH_MAX];
     if(sprintf(private_fifo_path, "/tmp/%d.%lu", request->pid, request->tid) < 0) return EXIT_FAILURE;
     int private_fifo_filedes = open(private_fifo_path, O_WRONLY);
-    if(private_fifo_filedes < 0) { output(request, op_GAVUP); return EXIT_FAILURE; }
+    if(private_fifo_filedes < 0) {
+        if(output(request, op_GAVUP)) return EXIT_FAILURE;
+        return EXIT_FAILURE;
+    }
     if(write(private_fifo_filedes, response, sizeof(message_t)) != sizeof(message_t)) ret = EXIT_FAILURE;
     if(close(private_fifo_filedes)) ret = EXIT_FAILURE;
     return ret;
@@ -95,7 +98,7 @@ int server_create_thread(const message_t *m){
     while(sem_wait(&place_semaphore )) if(errno != EINTR) { fprintf(stderr, "Could not wait\n"); return EXIT_FAILURE; }
 
     if (timeup_server) {
-        output(m_, op_2LATE);
+        if(output(m_, op_2LATE)) return EXIT_FAILURE;
         message_t response = {
             .i = m_->i,
             .pid = getpid(),
@@ -103,7 +106,7 @@ int server_create_thread(const message_t *m){
             .dur = -1,
             .pl = -1
         };
-        server_thread_answer(m_, &response);
+        if(server_thread_answer(m_, &response)) return EXIT_FAILURE;
 
         if(sem_post(&thread_semaphore)){ fprintf(stderr, "Could not post\n"); return EXIT_FAILURE; }
         if(sem_post(&place_semaphore )){ fprintf(stderr, "Could not post\n"); return EXIT_FAILURE; }
@@ -131,7 +134,9 @@ int server_close_service(const char *public_fifo_path){
     int public_fifo_filedes = open(public_fifo_path, O_RDONLY | O_NONBLOCK);
     if(public_fifo_filedes == -1 && errno != EINTR) ret = EXIT_FAILURE;
     
-    milli_t start_time, now_time; common_gettime(&start_time); common_gettime(&now_time);
+    milli_t start_time, now_time;
+    if(common_gettime(&start_time)) ret = EXIT_FAILURE;
+    now_time = start_time;
 
     message_t request;
     while(now_time-start_time <= EMPTY_FIFO_TIME_MILLIS){
@@ -152,7 +157,7 @@ int server_close_service(const char *public_fifo_path){
             if (server_thread_answer(&request, &response)) ret = EXIT_FAILURE;
             break;
         }
-        common_gettime(&now_time);
+        if(common_gettime(&now_time)) ret = EXIT_FAILURE;
     }
 
     if(close(public_fifo_filedes))  ret = EXIT_FAILURE;
