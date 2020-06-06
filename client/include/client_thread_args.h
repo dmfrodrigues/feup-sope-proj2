@@ -29,12 +29,14 @@ typedef struct {
  * @param public_fifoname Path of the fifo to where the request is to be sent
  * @return int EXIT_SUCCESS if successful, EXIT_FAILURE otherwise
  */
-int client_thread_args_ctor(client_thread_args_t *p, int i, int dur, const char *public_fifoname);
+int client_thread_args_ctor(client_thread_args_t *p, int i,
+                            int dur, const char *public_fifoname);
 
 /**
  * @brief client_thread destructor.
  * 
- * Destructs internal structures, but does not free the pointer; you have to free it yourself.
+ * Destructs internal structures, but does not free the pointer;
+ * you have to free it yourself.
  * 
  * @param p Pointer to object to destruct
  * @return int EXIT_SUCCESS if successful, EXIT_FAILURE otherwise

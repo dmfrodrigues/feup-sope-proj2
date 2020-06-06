@@ -3,7 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-int client_thread_args_ctor(client_thread_args_t *p, int i, int dur, const char *public_fifoname){
+int client_thread_args_ctor(client_thread_args_t *p, int i,
+                            int dur, const char *public_fifoname){
     if(p == NULL) return EXIT_FAILURE;
     p->i = i;
     p->dur = dur;
