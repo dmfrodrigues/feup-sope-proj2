@@ -1,8 +1,8 @@
 # Bathroom management system
 
-<p align="left">
-  <img src="https://github.com/dmfrodrigues/feup-sope-proj2/workflows/test/badge.svg">
-</p>
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+![test](https://github.com/dmfrodrigues/feup-sope-proj2/workflows/test/badge.svg)
 
 - **Project name:** Informatic access to Bathrooms
 - **Short description:** Server-client to handle conflicts over common resources (in this case, bathroom places)
