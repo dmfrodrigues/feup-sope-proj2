@@ -3,6 +3,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ![test](https://github.com/dmfrodrigues/feup-sope-proj2/workflows/test/badge.svg)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/60e7b934fa1e4029be499406bf83ca98)](https://www.codacy.com/gh/dmfrodrigues/feup-sope-proj2/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dmfrodrigues/feup-sope-proj2&amp;utm_campaign=Badge_Grade)
 
 - **Project name:** Informatic access to Bathrooms
 - **Short description:** Server-client to handle conflicts over common resources (in this case, bathroom places)
